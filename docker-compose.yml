@@ -1,0 +1,7 @@
+version: '2'
+
+services: 
+    cfsd-mission-control:
+        image: mission-control:v0.0.0
+        network_mode: "host"
+        command: "mission-control --cid=131 --mission=4 --verbose"
