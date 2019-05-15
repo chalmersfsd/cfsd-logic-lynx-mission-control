@@ -3,6 +3,8 @@ This mission control is a logic microsercvices with a small state machine inside
 
 see transaction at figure MissionControl-state-diagram.jpg
 
+![state diagram](<https://raw.githubusercontent.com/chalmersfsd/cfsd-logic-lynx-mission-control/master/MissionControl-state-diagram.jpg>)
+
 The logic of state transform is in the main thread.
 
 The logic part for different missions should be implemented by inheriting from the super clas: MissionControl.
