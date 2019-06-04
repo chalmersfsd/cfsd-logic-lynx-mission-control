@@ -4,6 +4,8 @@
 #include "cluon-complete.hpp"
 #include "opendlv-standard-message-set.hpp"
 #include "cfsd-extended-message-set.hpp"
+#include <string>
+
 
 enum MissionState{
     M_WAITING,
@@ -27,7 +29,8 @@ public:
     virtual bool step() = 0;
     virtual bool abort() = 0;
     bool finish();
-
+    void startMission(std::string missionName);
+    void stopMission(std::string missionName);
     void switchWaiting();
     void switchRunning();
     void switchFinished();
@@ -39,8 +42,9 @@ public:
     int m_missionState;
     int m_freq;
     bool m_missionFinished;
-    bool m_enable_Logging;
     const bool m_VERBOSE;
+
+    
 };
 
 #endif

@@ -38,23 +38,19 @@ int32_t main(int32_t argc, char **argv) {
     else {
         const bool VERBOSE{commandlineArguments.count("verbose") != 0};
         uint16_t cid = static_cast<uint16_t>(std::stoi(commandlineArguments["cid"]));
-        uint16_t missionID = -1;
+        uint16_t missionID = 0;
         bool missionSelected = false;
         MissionControl* mission;
         //Get the mission ID from command line. if it is not setted, it will wait for the state machine send a request
         if(commandlineArguments.count("mission") != 0){
             missionID = static_cast<uint16_t>(std::stoi(commandlineArguments["mission"]));
-            missionSelected = true;
             if(VERBOSE){
                 std::cerr << "[info] \t Mission selected: "<< missionID << std::endl;
             }
         }else{
             std::cerr << "[info] \t Mission not selected! waiting for stateMachine"<< std::endl;
         }
-        
-        if(commandlineArguments.count("mission") != 0){
 
-        }
         // Create sessions    
         cluon::OD4Session od4{cid};
         if(VERBOSE){
@@ -75,7 +71,6 @@ int32_t main(int32_t argc, char **argv) {
             // reading the mission id
             if(env.senderStamp() == 1906){ // asMission
                 missionID = p.state();
-                missionSelected = false;
                 if (VERBOSE){
                     std::cout << "[info] \t Mission Selected: " << p.state()<< std::endl;
                 }
@@ -88,12 +83,13 @@ int32_t main(int32_t argc, char **argv) {
             // initialization stage
             if (missionID>0 && missionSelected == false){
                 // create mission
-                if (missionID == 4){//braketest
-                    int frequency = 1;
+                if (missionID == asMission::AMI_BRAKETEST){//braketest
+                    int frequency = 33;
                     mission = new BrakeTest(od4, missionID, frequency, VERBOSE);
+                    mission -> startMission("braketest");
                 }else{
-                    std::cerr <<  "[Error] \t Mission ID" << missionID <<" is wrong or has not implemented yet." << std::endl;
-                    return -1 ;
+                    std::cout <<  "[Error] \t Mission ID" << missionID <<" is wrong or has not implemented yet." << std::endl;
+                    return false ;
                 }
                 //initialize if needed
                 mission->init();

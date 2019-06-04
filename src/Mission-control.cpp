@@ -27,6 +27,55 @@ bool MissionControl::sendMissionState()
     return true;
 }
 
+// first ssh in to the host
+void MissionControl::startMission(std::string missionName){
+    std::string systemCommand = "sshpass -p cfsd ssh -o StrictHostKeyChecking=no cfsd@172.17.0.1 ";
+
+    // cd ~/missionName/script
+    // sh missionName-up.sh
+
+    // inspection.sh
+    std::string startMissionCommand = "";
+    startMissionCommand += systemCommand;
+    startMissionCommand += "&& cd ~/script/";
+    startMissionCommand += missionName;
+    startMissionCommand += "&& sh ";
+    startMissionCommand += missionName;
+    startMissionCommand += "-up";
+    startMissionCommand += ".sh";
+
+    std::cout << "Up command: " << startMissionCommand << std::endl;
+
+
+    std::cout << "Starting Mission... " << system(startMissionCommand.c_str()) << " done." << std::endl;
+
+    cluon::data::TimeStamp sampleTime = cluon::time::now();
+}
+
+void MissionControl::stopMission(std::string missionName){
+    std::string systemCommand = "sshpass -p cfsd ssh -o StrictHostKeyChecking=no cfsd@172.17.0.1 ";
+
+    // cd ~/missionName/script
+    // sh missionName-down.sh
+
+    std::string startMissionCommand = "";
+    startMissionCommand += systemCommand;
+    startMissionCommand += "&& cd ~/script/";
+    startMissionCommand += missionName;
+    startMissionCommand += "&& sh ";
+    startMissionCommand += missionName;
+    startMissionCommand += "-down";
+    startMissionCommand += ".sh";
+
+    std::cout << "Down command: " << startMissionCommand << std::endl;
+
+
+    std::cout << "Starting Mission... " << system(startMissionCommand.c_str()) << " done." << std::endl;
+
+    cluon::data::TimeStamp sampleTime = cluon::time::now();
+}
+
+
 bool MissionControl::init()
 {
     return true;
