@@ -43,6 +43,10 @@ bool Inspection::step(){
         std::cout << "steering request: " << 1.0f * s << std::endl;
         std::cout << "speed request: " << 2.0f * s << std::endl;
     }
+    if (m_time > 25) {
+        m_missionFinished = true;
+        mission -> switchFinished();
+    }
     m_time += m_dt;
     return true;
 }
