@@ -22,6 +22,7 @@
 
 #include "Mission-control.hpp"
 #include "Brake-test.hpp"
+#include "Inspection.hpp"
 #include "cfsd-logic-lynx-mission-control.hpp"
 #include <cstdint>
 #include <iostream>
@@ -48,13 +49,13 @@ int32_t main(int32_t argc, char **argv) {
                 std::cerr << "[info] \t Mission selected: "<< missionID << std::endl;
             }
         }else{
-            std::cerr << "[info] \t Mission not selected! waiting for stateMachine"<< std::endl;
+            std::cerr << "[info] \t Mission not selected! waiting for stateMachine" << std::endl;
         }
 
         // Create sessions    
         cluon::OD4Session od4{cid};
         if(VERBOSE){
-            std::cerr <<  "Start conversation at Opendlv session cid: "<< cid << std::endl;
+            std::cerr << "Start conversation at Opendlv session cid: " << cid << std::endl;
         }
 
         // always read the as state 
@@ -72,7 +73,7 @@ int32_t main(int32_t argc, char **argv) {
             if(env.senderStamp() == 1906){ // asMission
                 missionID = p.state();
                 if (VERBOSE){
-                    std::cout << "[info] \t Mission Selected: " << p.state()<< std::endl;
+                    std::cout << "[info] \t Mission Selected: " << p.state() << std::endl;
                 }
                 
             }
@@ -86,7 +87,9 @@ int32_t main(int32_t argc, char **argv) {
                 if (missionID == asMission::AMI_BRAKETEST){//braketest
                     int frequency = 33;
                     mission = new BrakeTest(od4, missionID, frequency, VERBOSE);
-                    mission -> startMission("braketest");
+                }else if (missionID == asMission::AMI_INSPECTION){
+                    int frequency = 10;
+                    mission = new Inspection(od4, missionID, frequency, VERBOSE);
                 }else{
                     std::cout <<  "[Error] \t Mission ID" << missionID <<" is wrong or has not implemented yet." << std::endl;
                     return false ;

@@ -7,7 +7,7 @@ enum asState {
     AS_MANUAL
 };
 
- enum asMission {
+enum asMission {
     AMI_NONE,
     AMI_ACCELERATION, 
     AMI_SKIDPAD, 
