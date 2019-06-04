@@ -85,15 +85,39 @@ int32_t main(int32_t argc, char **argv) {
             // initialization stage
             if (missionID>0 && missionSelected == false){
                 // create mission
-                if (missionID == 4){//braketest
-                    int frequency = 1;
-                    mission = new BrakeTest(od4, missionID, frequency, VERBOSE);
-                }else if (missionID == asMission::AMI_INSPECTION){
-                    int frequency = 10;
-                    mission = new Inspection(od4, missionID, frequency, VERBOSE);
-                }else{
-                    std::cerr <<  "[Error] \t Mission ID" << missionID <<" is wrong or has not implemented yet." << std::endl;
-                    return -1 ;
+                switch (missionID) {
+                    int frequency;
+                    case asMission::AMI_BRAKETEST:
+                        frequency = 1;
+                        mission = new BrakeTest(od4, missionID, frequency, VERBOSE);
+                        mission -> startMission("braketest");
+                        break;
+                    case asMission::AMI_INSPECTION:
+                        frequency = 10;
+                        mission = new Inspection(od4, missionID, frequency, VERBOSE);
+                        mission -> startMission("inspection");
+                        break;
+                    case asMission::AMI_ACCELERATION:
+                        //todo
+                        break;
+                    case asMission::AMI_SKIDPAD:
+                        //todo
+                        break;
+                    case asMission::AMI_TRACKDRIVE:
+                        //todo
+                        break;
+                    case asMission::AMI_AUTOCROSS:
+                        //todo
+                        break;
+                    case asMission::AMI_MANUAL:
+                        //todo
+                        break;
+                    case asMission::AMI_TEST:
+                        //todo
+                        break;
+                    default:
+                        std::cerr <<  "[Error] \t Mission ID" << missionID <<" is wrong or has not implemented yet." << std::endl;
+                        return -1 ;
                 }
                 //initialize if needed
                 mission->init();
@@ -104,25 +128,29 @@ int32_t main(int32_t argc, char **argv) {
 
             bool res = true;
             // Before the mission start (AS_Ready), mission control should wait (or do something)
-            if (stateMachine == asState::AS_READY){
-                res = mission -> wait();
-                mission -> switchWaiting();
-            }else if(stateMachine == asState::AS_DRIVING){ // when mission start, it run steps
-                res = mission -> step();
-                if (!res){//if the step failed
-                    mission->switchError();
-                }else{//working fine
-                    if (mission -> m_missionFinished){// if mission finished
-                        mission -> switchFinished();
-                    }else{// keep running
-                        mission -> switchRunning();
+            switch (stateMachine) {
+                case asState::AS_READY:
+                    res = mission -> wait();
+                    mission -> switchWaiting();
+                    break;
+                case asState::AS_DRIVING: // when mission start, it run steps
+                    res = mission -> step();
+                    if (!res){//if the step failed
+                        mission->switchError();
+                    }else{//working fine
+                        if (mission -> m_missionFinished){// if mission finished
+                            mission -> switchFinished();
+                        }else{// keep running
+                            mission -> switchRunning();
+                        }
                     }
-                }
-            }else if(stateMachine == asState::AS_EMERGENCY){ // when Emergency triggered abourt the mission
-                res = mission -> abort();
-                mission -> switchAborted();
-            }else{ // do not care AS_OFF and AS_MANUAL and AS_FINISHED
-                res = true; // Do nothing
+                    break;
+                case asState::AS_EMERGENCY: // when Emergency triggered abourt the mission
+                    res = mission -> abort();
+                    mission -> switchAborted();
+                    break;
+                default: // do not care AS_OFF and AS_MANUAL and AS_FINISHED
+                    res = true; // Do nothing
             }
             mission -> sendMissionState();
 
