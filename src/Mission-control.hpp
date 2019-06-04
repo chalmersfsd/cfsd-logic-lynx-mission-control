@@ -22,7 +22,7 @@ public:
     MissionControl(cluon::OD4Session&, int, int, bool);
     virtual ~MissionControl();
     virtual bool create_data_trigger() = 0; 
-    virtual bool init() = 0;
+    virtual bool init();
     virtual bool wait() = 0;
     virtual bool step() = 0;
     virtual bool abort() = 0;
@@ -34,11 +34,12 @@ public:
     void switchError();
     void switchAborted();
     bool sendMissionState();
-
+    void dockercompose();
     int m_missionID;
     int m_missionState;
     int m_freq;
     bool m_missionFinished;
+    bool m_enable_Logging;
     const bool m_VERBOSE;
 };
 

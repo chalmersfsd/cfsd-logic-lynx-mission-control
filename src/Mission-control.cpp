@@ -27,6 +27,11 @@ bool MissionControl::sendMissionState()
     return true;
 }
 
+bool MissionControl::init()
+{
+    return true;
+}
+
 bool MissionControl::finish()
 {
     m_missionFinished = true;
