@@ -39,7 +39,6 @@ public:
     int m_missionState;
     int m_freq;
     bool m_missionFinished;
-    bool m_enable_Logging;
     const bool m_VERBOSE;
 };
 

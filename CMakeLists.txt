@@ -98,6 +98,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 add_executable(${PROJECT_NAME}  ${CMAKE_CURRENT_SOURCE_DIR}/src/${PROJECT_NAME}.cpp 
                                 ${CMAKE_CURRENT_SOURCE_DIR}/src/Mission-control.cpp 
                                 ${CMAKE_CURRENT_SOURCE_DIR}/src/Brake-test.cpp 
+                                ${CMAKE_CURRENT_SOURCE_DIR}/src/Inspection.cpp 
                                 ${CMAKE_BINARY_DIR}/cluon-complete.hpp 
                                 ${CMAKE_BINARY_DIR}/opendlv-standard-message-set.hpp 
                                 ${CMAKE_BINARY_DIR}/cfsd-extended-message-set.hpp)

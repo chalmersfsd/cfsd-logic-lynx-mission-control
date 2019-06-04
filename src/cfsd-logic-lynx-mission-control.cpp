@@ -22,6 +22,7 @@
 
 #include "Mission-control.hpp"
 #include "Brake-test.hpp"
+#include "Inspection.hpp"
 #include "cfsd-logic-lynx-mission-control.hpp"
 #include <cstdint>
 #include <iostream>
@@ -44,21 +45,17 @@ int32_t main(int32_t argc, char **argv) {
         //Get the mission ID from command line. if it is not setted, it will wait for the state machine send a request
         if(commandlineArguments.count("mission") != 0){
             missionID = static_cast<uint16_t>(std::stoi(commandlineArguments["mission"]));
-            missionSelected = true;
             if(VERBOSE){
                 std::cerr << "[info] \t Mission selected: "<< missionID << std::endl;
             }
         }else{
-            std::cerr << "[info] \t Mission not selected! waiting for stateMachine"<< std::endl;
+            std::cerr << "[info] \t Mission not selected! waiting for stateMachine" << std::endl;
         }
-        
-        if(commandlineArguments.count("mission") != 0){
 
-        }
         // Create sessions    
         cluon::OD4Session od4{cid};
         if(VERBOSE){
-            std::cerr <<  "Start conversation at Opendlv session cid: "<< cid << std::endl;
+            std::cerr << "Start conversation at Opendlv session cid: " << cid << std::endl;
         }
 
         // always read the as state 
@@ -77,7 +74,7 @@ int32_t main(int32_t argc, char **argv) {
                 missionID = p.state();
                 missionSelected = false;
                 if (VERBOSE){
-                    std::cout << "[info] \t Mission Selected: " << p.state()<< std::endl;
+                    std::cout << "[info] \t Mission Selected: " << p.state() << std::endl;
                 }
                 
             }
@@ -91,6 +88,9 @@ int32_t main(int32_t argc, char **argv) {
                 if (missionID == 4){//braketest
                     int frequency = 1;
                     mission = new BrakeTest(od4, missionID, frequency, VERBOSE);
+                }else if (missionID == asMission::AMI_INSPECTION){
+                    int frequency = 10;
+                    mission = new Inspection(od4, missionID, frequency, VERBOSE);
                 }else{
                     std::cerr <<  "[Error] \t Mission ID" << missionID <<" is wrong or has not implemented yet." << std::endl;
                     return -1 ;
