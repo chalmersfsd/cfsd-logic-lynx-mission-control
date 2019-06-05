@@ -16,8 +16,9 @@ class Inspection: public MissionControl
 {
 private:
     /* data */
-    float m_time;
+    float m_t;
     float m_dt;
+    long m_start_timestamp;
 public:
     Inspection(cluon::OD4Session&, int, int, bool);
     ~Inspection();

@@ -90,12 +90,12 @@ int32_t main(int32_t argc, char **argv) {
                     case asMission::AMI_BRAKETEST:
                         frequency = 1;
                         mission = new BrakeTest(od4, missionID, frequency, VERBOSE);
-                        mission -> startMission("braketest");
+                        // mission -> startMission("braketest");
                         break;
                     case asMission::AMI_INSPECTION:
                         frequency = 10;
                         mission = new Inspection(od4, missionID, frequency, VERBOSE);
-                        mission -> startMission("inspection");
+                        // mission -> startMission("inspection");
                         break;
                     case asMission::AMI_ACCELERATION:
                         //todo
