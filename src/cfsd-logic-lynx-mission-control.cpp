@@ -77,7 +77,7 @@ int32_t main(int32_t argc, char **argv) {
             }
             // reading the mission id
             if(env.senderStamp() == 1906){ // asMission
-                if(missionID==0){
+                if(!missionSelected){
                     missionID = p.state();
                     if (VERBOSE){
                         std::cout << "[info] \t Mission Selected: " << missionID << std::endl;
