@@ -90,7 +90,7 @@ int32_t main(int32_t argc, char **argv) {
         auto missionStep = [VERBOSE,&od4,&mission,&stateMachine,&missionID,&missionSelected,frequency]() -> bool{
             bool res = true;
             // initialization stage
-            if (missionID>0 && missionSelected == false){
+            if (missionID>0 && missionSelected == false && stateMachine == asState::AS_READY){
                 // create mission
                 switch (missionID) {
                     case asMission::AMI_BRAKETEST:

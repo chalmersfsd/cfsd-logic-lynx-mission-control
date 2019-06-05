@@ -23,6 +23,7 @@ RUN apk update && \
         cmake \
         g++ \
         git \
+        sshpass\
         make
 
 ADD . /opt/sources

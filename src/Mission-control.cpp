@@ -73,7 +73,7 @@ void MissionControl::stopMission(){
     std::cout << "Down command: " << startMissionCommand << std::endl;
 
 
-    std::cout << "Starting Mission... " << system(startMissionCommand.c_str()) << " done." << std::endl;
+    std::cout << "Stop Mission... " << system(startMissionCommand.c_str()) << " done." << std::endl;
 
     cluon::data::TimeStamp sampleTime = cluon::time::now();
 }
