@@ -2,8 +2,9 @@
 
 Inspection::Inspection(cluon::OD4Session& od4, int missionID, int freq, bool VERBOSE)
   : MissionControl(od4, missionID, freq, VERBOSE)
-  , m_time{0}
+  , m_t{0}
   , m_dt{0}
+  , m_start_timestamp{0}
 {
 
 }
@@ -31,19 +32,30 @@ bool Inspection::init(){
 
 bool Inspection::step(){
     cluon::data::TimeStamp ts{cluon::time::now()};
+    float s = std::sin(m_t);
+
     opendlv::proxy::GroundSteeringRequest steer;
-    opendlv::proxy::GroundSpeedRequest speed;
-    float s = std::sin(m_time);
-    steer.groundSteering(1.0f * s);
-    speed.groundSpeed(2.0f * s);
+    steer.groundSteering(20.0f * s);
     m_od4.send(steer, ts, 2801);
-    m_od4.send(speed, ts, 2201);
+    
+    opendlv::cfsdProxy::TorqueRequestDual torque;
+    torque.torqueLeft(40);
+    torque.torqueRight(40);
+    m_od4.send(torque, ts, 2101);
+    
     if(m_VERBOSE){
         std::cout << "Inspection step" << std::endl;
-        std::cout << "steering request: " << 1.0f * s << std::endl;
-        std::cout << "speed request: " << 2.0f * s << std::endl;
+        std::cout << "steering request: " << 20.0f * s << std::endl;
     }
-    m_time += m_dt;
+    
+    // After 25 s to 30 s the mission is finished
+    if (cluon::time::toMicroseconds(ts) - m_start_timestamp > 25000000) {
+        m_missionFinished = true;
+        std::cout << "Inspection finished" << std::endl;
+        switchFinished();
+    }
+    m_t += m_dt;
+
     return true;
 }
 
@@ -55,6 +67,7 @@ bool Inspection::abort(){
 }
 
 bool Inspection::wait(){
+    m_start_timestamp = cluon::time::toMicroseconds(cluon::time::now());
     if(m_VERBOSE){
         std::cout << "Inspection Waiting" << std::endl;
     }

@@ -6,6 +6,7 @@ MissionControl::MissionControl(cluon::OD4Session& od4, int missionID, int freq, 
   , m_missionState{0}
   , m_freq{freq}
   , m_missionFinished{false}
+  , m_missionName {""}
   , m_VERBOSE{VERBOSE}
 {
     if(m_VERBOSE){
@@ -29,6 +30,8 @@ bool MissionControl::sendMissionState()
 
 // first ssh in to the host
 void MissionControl::startMission(std::string missionName){
+    this -> m_missionName = missionName;
+
     std::string systemCommand = "sshpass -p cfsd ssh -o StrictHostKeyChecking=no cfsd@172.17.0.1 ";
 
     // cd ~/missionName/script
@@ -52,7 +55,7 @@ void MissionControl::startMission(std::string missionName){
     cluon::data::TimeStamp sampleTime = cluon::time::now();
 }
 
-void MissionControl::stopMission(std::string missionName){
+void MissionControl::stopMission(){
     std::string systemCommand = "sshpass -p cfsd ssh -o StrictHostKeyChecking=no cfsd@172.17.0.1 ";
 
     // cd ~/missionName/script
@@ -61,9 +64,9 @@ void MissionControl::stopMission(std::string missionName){
     std::string startMissionCommand = "";
     startMissionCommand += systemCommand;
     startMissionCommand += "&& cd ~/script/";
-    startMissionCommand += missionName;
+    startMissionCommand += this -> m_missionName;
     startMissionCommand += "&& sh ";
-    startMissionCommand += missionName;
+    startMissionCommand += this -> m_missionName;
     startMissionCommand += "-down";
     startMissionCommand += ".sh";
 
@@ -114,5 +117,11 @@ void MissionControl::switchError()
 void MissionControl::switchAborted()
 {
     m_missionState = MissionState::M_ABORTED;
+    return;
+}
+
+void MissionControl::switchStopped()
+{
+    m_missionState = MissionState::M_STOPPED;
     return;
 }

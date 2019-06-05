@@ -34,14 +34,14 @@ int32_t main(int32_t argc, char **argv) {
         std::cerr << "Usage:   " << argv[0] << " --cid=<OD4 session> mission=<Mission No> [--verbose]" << std::endl;
         std::cerr << "         --cid:    CID of the OD4Session to send and receive messages" << std::endl;
         std::cerr << "         --mission:index of the Mission" << std::endl;
-        std::cerr << "Example: " << argv[0] << " --cid=131 --mission=0 --frequency=33 --verbose" << std::endl;
+        std::cerr << "Example: " << argv[0] << " --cid=131 --mission=0 --frequency=66 --verbose" << std::endl;
     }
     else {
         const bool VERBOSE{commandlineArguments.count("verbose") != 0};
         uint16_t cid = static_cast<uint16_t>(std::stoi(commandlineArguments["cid"]));
         uint16_t missionID = 0;
         bool missionSelected = false;
-        MissionControl* mission;
+        MissionControl* mission = NULL;
         //Get the mission ID from command line. if it is not setted, it will wait for the state machine send a request
         if(commandlineArguments.count("mission") != 0){
             missionID = static_cast<uint16_t>(std::stoi(commandlineArguments["mission"]));
@@ -92,13 +92,42 @@ int32_t main(int32_t argc, char **argv) {
             // initialization stage
             if (missionID>0 && missionSelected == false){
                 // create mission
-                if (missionID == asMission::AMI_BRAKETEST){//braketest
-                    mission = new BrakeTest(od4, missionID, frequency, VERBOSE);
-                }else if (missionID == asMission::AMI_INSPECTION){
-                    mission = new Inspection(od4, missionID, frequency, VERBOSE);
-                }else{
-                    std::cout <<  "[Error] \t Mission ID" << missionID <<" is wrong or has not implemented yet." << std::endl;
-                    res = false;
+                switch (missionID) {
+                    case asMission::AMI_BRAKETEST:
+                        mission = new BrakeTest(od4, missionID, frequency, VERBOSE);
+                        mission -> startMission("braketest");
+                        break;
+                    case asMission::AMI_INSPECTION:
+                        mission = new Inspection(od4, missionID, frequency, VERBOSE);
+                        mission -> startMission("inspection");
+                        break;
+                    case asMission::AMI_ACCELERATION:
+                        std::cerr <<  "[Error] \t Mission ID " << missionID <<" has not implemented yet." << std::endl;
+                        //todo
+                        break;
+                    case asMission::AMI_SKIDPAD:
+                        std::cerr <<  "[Error] \t Mission ID " << missionID <<" has not implemented yet." << std::endl;
+                        //todo
+                        break;
+                    case asMission::AMI_TRACKDRIVE:
+                        //todo
+                        std::cerr <<  "[Error] \t Mission ID " << missionID <<" has not implemented yet." << std::endl;
+                        break;
+                    case asMission::AMI_AUTOCROSS:
+                        //todo
+                        std::cerr <<  "[Error] \t Mission ID " << missionID <<" has not implemented yet." << std::endl;
+                        break;
+                    case asMission::AMI_MANUAL:
+                        //todo
+                        std::cerr <<  "[Error] \t Mission ID " << missionID <<" has not implemented yet." << std::endl;
+                        break;
+                    case asMission::AMI_TEST:
+                        //todo
+                        std::cerr <<  "[Error] \t Mission ID " << missionID <<" has not implemented yet." << std::endl;
+                        break;
+                    default:
+                        std::cerr <<  "[Error] \t Mission ID " << missionID <<" is wrong or has not implemented yet." << std::endl;
+                        return false ;
                 }
                 //initialize if needed
                 mission->init();
@@ -106,29 +135,49 @@ int32_t main(int32_t argc, char **argv) {
                 // The data trigger should be handeled by missioncontrol itself
                 mission->create_data_trigger();
                 missionSelected= true;
-            }else if(missionID>0 && missionSelected == true){
-                // Before the mission start (AS_Ready), mission control should wait (or do something)
-                if (stateMachine == asState::AS_READY){
-                    res = mission -> wait();
-                    mission -> switchWaiting();
-                }else if(stateMachine == asState::AS_DRIVING){ // when mission start, it run steps
-                    res = mission -> step();
-                    if (!res){//if the step failed
-                        mission->switchError();
-                    }else{//working fine
-                        if (mission -> m_missionFinished){// if mission finished
-                            mission -> switchFinished();
-                        }else{// keep running
-                            mission -> switchRunning();
+            }
+            // will start the mission control after mission is selected.
+            if (missionID>0 && missionSelected == true){
+            // Before the mission start (AS_Ready), mission control should wait (or do something)
+                switch (stateMachine) {
+                    case asState::AS_READY:
+                        res = mission -> wait();
+                        mission -> switchWaiting();
+                        break;
+                    case asState::AS_DRIVING: // when mission start, it run steps
+                        res = mission -> step();
+                        if (!res){//if the step failed
+                            mission->switchError();
+                        }else{//working fine
+                            if (mission -> m_missionFinished){// if mission finished
+                                mission -> switchFinished();
+                            }else{// keep running
+                                mission -> switchRunning();
+                            }
                         }
-                    }
-                }else if(stateMachine == asState::AS_EMERGENCY){ // when Emergency triggered abourt the mission
-                    res = mission -> abort();
-                    mission -> switchAborted();
-                }else{ // do not care AS_OFF and AS_MANUAL and AS_FINISHED
-                    res = true; // Do nothing
+                        break;
+                    case asState::AS_EMERGENCY: // when Emergency triggered abourt the mission
+                        res = mission -> abort();
+                        if(mission->m_missionState != MissionState::M_ABORTED){
+                            mission -> stopMission();
+                            mission -> switchAborted();
+                        }
+                        break;
+                    case asState::AS_FINISHED:
+                        if(mission->m_missionState != MissionState::M_STOPPED){
+                            mission -> stopMission();
+                            mission -> switchStopped();
+                        }
+                        break;
+                    case asState::AS_OFF:
+                        if(missionID != 0){
+                            missionID=0;
+                            missionSelected = false;
+                        }
+                        break;
+                    default: // do not care AS_OFF and AS_MANUAL and AS_FINISHED
+                        res = true; // Do nothing
                 }
-                mission -> sendMissionState();
             }
             return res;
         };

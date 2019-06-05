@@ -12,7 +12,8 @@ enum MissionState{
     M_RUNNING,
     M_FINISHED,
     M_ERROR,
-    M_ABORTED
+    M_ABORTED,
+    M_STOPPED
 };
 
 class MissionControl
@@ -30,21 +31,21 @@ public:
     virtual bool abort() = 0;
     bool finish();
     void startMission(std::string missionName);
-    void stopMission(std::string missionName);
+    void stopMission();
     void switchWaiting();
     void switchRunning();
     void switchFinished();
     void switchError();
     void switchAborted();
+    void switchStopped();
     bool sendMissionState();
     void dockercompose();
     int m_missionID;
     int m_missionState;
     int m_freq;
     bool m_missionFinished;
-    const bool m_VERBOSE;
-
-    
+    std::string m_missionName;
+    const bool m_VERBOSE;   
 };
 
 #endif
