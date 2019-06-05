@@ -31,6 +31,9 @@ bool Inspection::init(){
 }
 
 bool Inspection::step(){
+    if (m_missionFinished)
+        return true;
+    
     cluon::data::TimeStamp ts{cluon::time::now()};
     float s = std::sin(m_t);
 
@@ -52,10 +55,8 @@ bool Inspection::step(){
     if (cluon::time::toMicroseconds(ts) - m_start_timestamp > 25000000) {
         m_missionFinished = true;
         std::cout << "Inspection finished" << std::endl;
-        switchFinished();
     }
     m_t += m_dt;
-
     return true;
 }
 
