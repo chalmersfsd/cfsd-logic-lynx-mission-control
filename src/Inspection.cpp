@@ -24,7 +24,6 @@ bool Inspection::create_data_trigger()
 
 bool Inspection::init(){
     m_dt = 1.0f / (float)m_freq;
-    m_start_timestamp = cluon::time::toMicroseconds(cluon::time::now());
     if(m_VERBOSE){
         std::cout << "Inspection Initialize" << std::endl;
     }
@@ -68,6 +67,7 @@ bool Inspection::abort(){
 }
 
 bool Inspection::wait(){
+    m_start_timestamp = cluon::time::toMicroseconds(cluon::time::now());
     if(m_VERBOSE){
         std::cout << "Inspection Waiting" << std::endl;
     }
