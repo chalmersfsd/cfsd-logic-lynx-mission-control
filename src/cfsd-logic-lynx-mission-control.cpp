@@ -34,7 +34,7 @@ int32_t main(int32_t argc, char **argv) {
         std::cerr << "Usage:   " << argv[0] << " --cid=<OD4 session> mission=<Mission No> [--verbose]" << std::endl;
         std::cerr << "         --cid:    CID of the OD4Session to send and receive messages" << std::endl;
         std::cerr << "         --mission:index of the Mission" << std::endl;
-        std::cerr << "Example: " << argv[0] << " --cid=131 --mission=0 --enableLog --verbose" << std::endl;
+        std::cerr << "Example: " << argv[0] << " --cid=131 --mission=0 --frequency=33 --verbose" << std::endl;
     }
     else {
         const bool VERBOSE{commandlineArguments.count("verbose") != 0};
@@ -51,7 +51,13 @@ int32_t main(int32_t argc, char **argv) {
         }else{
             std::cerr << "[info] \t Mission not selected! waiting for stateMachine" << std::endl;
         }
+        // if the frequency is not set, then it runs at 60Hz as default
+        uint16_t frequency = 60;
 
+        if (commandlineArguments.count("frequency") != 0)
+        {
+            frequency = static_cast<uint16_t>(std::stoi(commandlineArguments["frequency"]));
+        }
         // Create sessions    
         cluon::OD4Session od4{cid};
         if(VERBOSE){
@@ -71,64 +77,63 @@ int32_t main(int32_t argc, char **argv) {
             }
             // reading the mission id
             if(env.senderStamp() == 1906){ // asMission
-                missionID = p.state();
-                if (VERBOSE){
-                    std::cout << "[info] \t Mission Selected: " << p.state() << std::endl;
+                if(missionID==0){
+                    missionID = p.state();
+                    if (VERBOSE){
+                        std::cout << "[info] \t Mission Selected: " << missionID << std::endl;
+                    }
                 }
-                
             }
         };
         od4.dataTrigger(opendlv::proxy::SwitchStateReading::ID(), SwitchStateReading);
 
-        auto missionStep = [VERBOSE,&od4,&mission,&stateMachine,missionID,&missionSelected]() -> bool{
+        auto missionStep = [VERBOSE,&od4,&mission,&stateMachine,&missionID,&missionSelected,frequency]() -> bool{
+            bool res = true;
             // initialization stage
             if (missionID>0 && missionSelected == false){
                 // create mission
                 if (missionID == asMission::AMI_BRAKETEST){//braketest
-                    int frequency = 33;
                     mission = new BrakeTest(od4, missionID, frequency, VERBOSE);
                 }else if (missionID == asMission::AMI_INSPECTION){
-                    int frequency = 10;
                     mission = new Inspection(od4, missionID, frequency, VERBOSE);
                 }else{
                     std::cout <<  "[Error] \t Mission ID" << missionID <<" is wrong or has not implemented yet." << std::endl;
-                    return false ;
+                    res = false;
                 }
                 //initialize if needed
                 mission->init();
+
                 // The data trigger should be handeled by missioncontrol itself
                 mission->create_data_trigger();
                 missionSelected= true;
-            }
-
-            bool res = true;
-            // Before the mission start (AS_Ready), mission control should wait (or do something)
-            if (stateMachine == asState::AS_READY){
-                res = mission -> wait();
-                mission -> switchWaiting();
-            }else if(stateMachine == asState::AS_DRIVING){ // when mission start, it run steps
-                res = mission -> step();
-                if (!res){//if the step failed
-                    mission->switchError();
-                }else{//working fine
-                    if (mission -> m_missionFinished){// if mission finished
-                        mission -> switchFinished();
-                    }else{// keep running
-                        mission -> switchRunning();
+            }else if(missionID>0 && missionSelected == true){
+                // Before the mission start (AS_Ready), mission control should wait (or do something)
+                if (stateMachine == asState::AS_READY){
+                    res = mission -> wait();
+                    mission -> switchWaiting();
+                }else if(stateMachine == asState::AS_DRIVING){ // when mission start, it run steps
+                    res = mission -> step();
+                    if (!res){//if the step failed
+                        mission->switchError();
+                    }else{//working fine
+                        if (mission -> m_missionFinished){// if mission finished
+                            mission -> switchFinished();
+                        }else{// keep running
+                            mission -> switchRunning();
+                        }
                     }
+                }else if(stateMachine == asState::AS_EMERGENCY){ // when Emergency triggered abourt the mission
+                    res = mission -> abort();
+                    mission -> switchAborted();
+                }else{ // do not care AS_OFF and AS_MANUAL and AS_FINISHED
+                    res = true; // Do nothing
                 }
-            }else if(stateMachine == asState::AS_EMERGENCY){ // when Emergency triggered abourt the mission
-                res = mission -> abort();
-                mission -> switchAborted();
-            }else{ // do not care AS_OFF and AS_MANUAL and AS_FINISHED
-                res = true; // Do nothing
+                mission -> sendMissionState();
             }
-            mission -> sendMissionState();
-
             return res;
         };
         // Finally, register the lambda as time-triggered function.
-        od4.timeTrigger(mission->m_freq, missionStep); // Won't return until stopped.
+        od4.timeTrigger(frequency, missionStep); // Won't return until stopped.
     }
     return 0;
 }

@@ -99,6 +99,10 @@ void MissionControl::switchRunning()
 }
 void MissionControl::switchFinished()
 {
+    cluon::data::TimeStamp now{cluon::time::now()};
+    opendlv::proxy::SwitchStateRequest msg;
+    msg.state(m_missionState);
+    m_od4.send(msg, now, 1066); //finishedSignal
     m_missionState = MissionState::M_FINISHED;
     return;
 }
