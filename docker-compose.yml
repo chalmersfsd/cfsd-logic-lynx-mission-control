@@ -4,4 +4,4 @@ services:
     cfsd-mission-control:
         image: mission-control:v0.0.0
         network_mode: "host"
-        command: "mission-control --cid=131 --frequency=1 --verbose"
+        command: "--cid=131 --frequency=10 --verbose"
