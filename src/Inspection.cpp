@@ -22,6 +22,13 @@ bool Inspection::create_data_trigger()
     return true;
 }
 
+bool Inspection::remove_data_trigger(){
+    if (m_VERBOSE){
+        std::cout << "Remove Inspection Data Trigger" << std::endl;
+    }
+    return true;
+}
+
 bool Inspection::init(){
     m_dt = 1.0f / (float)m_freq;
     if(m_VERBOSE){

@@ -25,6 +25,7 @@ public:
     MissionControl(cluon::OD4Session&, int, int, bool);
     virtual ~MissionControl();
     virtual bool create_data_trigger() = 0; 
+    virtual bool remove_data_trigger() = 0;
     virtual bool init();
     virtual bool wait() = 0;
     virtual bool step() = 0;

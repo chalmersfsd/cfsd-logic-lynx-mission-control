@@ -23,6 +23,7 @@ public:
     Inspection(cluon::OD4Session&, int, int, bool);
     ~Inspection();
     bool create_data_trigger(); 
+    bool remove_data_trigger();
     bool wait();
     bool init();
     bool step();

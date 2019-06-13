@@ -11,10 +11,32 @@ BrakeTest::~BrakeTest()
     
 }
 
-bool BrakeTest::create_data_trigger()
-{
+bool BrakeTest::create_data_trigger(){
+    auto dataReading = [](cluon::data::Envelope &&env){
+        // opendlv::proxy::SwitchStateReading p = cluon::extractMessage<opendlv::proxy::SwitchStateReading>(std::move(env));
+        // // reading the as state from the state machine for 
+        // if(env.senderStamp() == 2101){//asState
+        //     std::cout << "2101: AsState: " << p.state()<< std::endl;
+        // }
+        // // reading the mission id
+        // if(env.senderStamp() == 1906){ // asMission
+        //     std::cout << "[info] \t Mission Selected: " << p.state() << std::endl;
+        // }
+        
+        std::cout << "date trigger in BrakeTest" << std::endl;
+    };
+    m_od4.dataTrigger(opendlv::proxy::TorqueRequest::ID(), dataReading);
+
     if(m_VERBOSE){
-        std::cerr <<  "Created BrakeTest Data trigger" << std::endl;
+        std::cout << "Created BrakeTest Data Trigger" << std::endl;
+    }
+    return true;
+}
+
+bool BrakeTest::remove_data_trigger(){
+    m_od4.dataTrigger(opendlv::proxy::TorqueRequest::ID(), nullptr);
+    if (m_VERBOSE){
+        std::cout << "Remove BrakeTest Data Trigger" << std::endl;
     }
     return true;
 }
