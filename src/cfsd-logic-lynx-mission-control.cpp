@@ -76,10 +76,19 @@ int32_t main(int32_t argc, char **argv) {
                 }
             }
             // reading the mission id
+<<<<<<< HEAD
             else if (env.senderStamp() == 1906){ // asMission
                 missionID = p.state();
                 if (VERBOSE && !missionSelected){
                     std::cout << "[info] \t Mission Selected: " << missionID << std::endl;
+=======
+            if(env.senderStamp() == 1906){ // asMission
+                if(!missionSelected){
+                    missionID = p.state();
+                    if (VERBOSE){
+                        std::cout << "[info] \t Mission Selected: " << missionID << std::endl;
+                    }
+>>>>>>> de9b07dd0c1b98b7c2b49e6f8758b2bdc9d82487
                 }
             }
         };
