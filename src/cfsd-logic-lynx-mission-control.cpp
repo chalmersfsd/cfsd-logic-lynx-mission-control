@@ -68,20 +68,18 @@ int32_t main(int32_t argc, char **argv) {
         int stateMachine = 0;
         auto SwitchStateReading = [VERBOSE,&stateMachine,&missionID,&missionSelected](cluon::data::Envelope &&env){
             opendlv::proxy::SwitchStateReading p = cluon::extractMessage<opendlv::proxy::SwitchStateReading>(std::move(env));
-            // reading the as state from the state machine for 
-            if(env.senderStamp() == 2101){//asState
+            // reading the as state from the state machine
+            if (env.senderStamp() == 2101){ // asState
+                stateMachine = p.state();
                 if (VERBOSE){
                     //std::cout << "2101: AsState: " << p.state()<< std::endl;
                 }
-                stateMachine = p.state();
             }
             // reading the mission id
-            if(env.senderStamp() == 1906){ // asMission
-                if(missionID==0){
-                    missionID = p.state();
-                    if (VERBOSE){
-                        std::cout << "[info] \t Mission Selected: " << missionID << std::endl;
-                    }
+            else if (env.senderStamp() == 1906){ // asMission
+                missionID = p.state();
+                if (VERBOSE && !missionSelected){
+                    std::cout << "[info] \t Mission Selected: " << missionID << std::endl;
                 }
             }
         };
@@ -89,8 +87,8 @@ int32_t main(int32_t argc, char **argv) {
 
         auto missionStep = [VERBOSE,&od4,&mission,&stateMachine,&missionID,&missionSelected,frequency]() -> bool{
             bool res = true;
-            // initialization stage
-            if (missionID>0 && missionSelected == false && stateMachine == asState::AS_READY){
+            // initialization stage: if no mission is selected yet, and mission is none, and asState is ready
+            if (missionSelected == false && missionID > 0 && stateMachine == asState::AS_READY){
                 // create mission
                 switch (missionID) {
                     case asMission::AMI_BRAKETEST:
@@ -102,8 +100,9 @@ int32_t main(int32_t argc, char **argv) {
                         mission -> startMission("inspection");
                         break;
                     case asMission::AMI_ACCELERATION:
+                        // mission = new Acceleration(od4, missionID, frequency, VERBOSE);
+                        // mission -> startMission("acceleration");
                         std::cerr <<  "[Error] \t Mission ID " << missionID <<" has not implemented yet." << std::endl;
-                        //todo
                         break;
                     case asMission::AMI_SKIDPAD:
                         std::cerr <<  "[Error] \t Mission ID " << missionID <<" has not implemented yet." << std::endl;
@@ -134,10 +133,11 @@ int32_t main(int32_t argc, char **argv) {
 
                 // The data trigger should be handeled by missioncontrol itself
                 mission->create_data_trigger();
-                missionSelected= true;
+                missionSelected = true;
             }
+
             // will start the mission control after mission is selected.
-            if (missionID>0 && missionSelected == true){
+            if (missionID > 0 && missionSelected == true){
             // Before the mission start (AS_Ready), mission control should wait (or do something)
                 switch (stateMachine) {
                     case asState::AS_READY:
@@ -157,21 +157,25 @@ int32_t main(int32_t argc, char **argv) {
                         }
                         break;
                     case asState::AS_EMERGENCY: // when Emergency triggered abourt the mission
-                        res = mission -> abort();
                         if(mission->m_missionState != MissionState::M_ABORTED){
+                            res = mission -> abort();
+                            mission -> remove_data_trigger();
                             mission -> stopMission();
                             mission -> switchAborted();
+                            missionSelected = false;
                         }
                         break;
                     case asState::AS_FINISHED:
                         if(mission->m_missionState != MissionState::M_STOPPED){
+                            mission -> remove_data_trigger();
                             mission -> stopMission();
                             mission -> switchStopped();
+                            missionSelected = false;
                         }
                         break;
                     case asState::AS_OFF:
                         if(missionID != 0){
-                            missionID=0;
+                            missionID = 0;
                             missionSelected = false;
                         }
                         break;
