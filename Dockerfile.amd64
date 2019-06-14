@@ -23,7 +23,6 @@ RUN apk update && \
         cmake \
         g++ \
         git \
-        sshpass\
         make
 
 ADD . /opt/sources
@@ -40,7 +39,10 @@ RUN rm -rf build && \
 FROM alpine:3.7
 MAINTAINER Naichen Wang "naichen@student.chalmers.se"
 
-
+RUN apk update && \
+    apk --no-cache add \
+    openssh \
+    sshpass
 WORKDIR /usr/bin
 COPY --from=builder /tmp/cfsd-logic-lynx-mission-control-dest/bin/cfsd-logic-lynx-mission-control .
 ENTRYPOINT ["/usr/bin/cfsd-logic-lynx-mission-control"]

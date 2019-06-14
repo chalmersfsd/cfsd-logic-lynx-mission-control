@@ -40,12 +40,12 @@ void MissionControl::startMission(std::string missionName){
     // inspection.sh
     std::string startMissionCommand = "";
     startMissionCommand += systemCommand;
-    startMissionCommand += "&& cd ~/script/";
+    startMissionCommand += " \" cd ~/script/";
     startMissionCommand += missionName;
     startMissionCommand += "&& sh ";
     startMissionCommand += missionName;
     startMissionCommand += "-up";
-    startMissionCommand += ".sh";
+    startMissionCommand += ".sh \" ";
 
     std::cout << "Up command: " << startMissionCommand << std::endl;
 
@@ -63,12 +63,12 @@ void MissionControl::stopMission(){
 
     std::string startMissionCommand = "";
     startMissionCommand += systemCommand;
-    startMissionCommand += "&& cd ~/script/";
+    startMissionCommand += " \" cd ~/script/";
     startMissionCommand += this -> m_missionName;
     startMissionCommand += "&& sh ";
     startMissionCommand += this -> m_missionName;
     startMissionCommand += "-down";
-    startMissionCommand += ".sh";
+    startMissionCommand += ".sh \" ";
 
     std::cout << "Down command: " << startMissionCommand << std::endl;
 
