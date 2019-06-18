@@ -86,8 +86,9 @@ int32_t main(int32_t argc, char **argv) {
         od4.dataTrigger(opendlv::proxy::SwitchStateReading::ID(), SwitchStateReading);
 
         uint16_t torqueRequest = static_cast<uint16_t>(std::stoi(commandlineArguments["torqueRequest"]));
+        uint16_t counterBeforeDriving = 0;
 
-        auto missionStep = [VERBOSE,&od4,&mission,&stateMachine,&missionID,&missionSelected,frequency,torqueRequest]() -> bool{
+        auto missionStep = [VERBOSE,&od4,&mission,&stateMachine,&missionID,&missionSelected,&counterBeforeDriving,frequency,torqueRequest]() -> bool{
             bool res = true;
             // initialization stage: if no mission is selected yet, and mission is none, and asState is ready
             if (missionSelected == false && missionID > 0 && stateMachine == asState::AS_READY){
@@ -144,10 +145,14 @@ int32_t main(int32_t argc, char **argv) {
             // Before the mission start (AS_Ready), mission control should wait (or do something)
                 switch (stateMachine) {
                     case asState::AS_READY:
+                        counterBeforeDriving = 0;
                         res = mission -> wait();
                         mission -> switchWaiting();
                         break;
                     case asState::AS_DRIVING: // when mission start, it run steps
+                        if (counterBeforeDriving++ < 2 * frequency)
+                            // wait 2s for initial brake (0.5s) and ready-to-drive sound
+                            break;
                         res = mission -> step();
                         if (!res){//if the step failed
                             mission->switchError();

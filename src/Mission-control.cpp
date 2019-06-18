@@ -21,10 +21,10 @@ MissionControl::~MissionControl()
 
 bool MissionControl::sendMissionState()
 {
-    cluon::data::TimeStamp now{cluon::time::now()};
-    opendlv::proxy::SwitchStateRequest msg;
-    msg.state(m_missionState);
-    m_od4.send(msg, now, 1902); //asMissionFinished
+    // cluon::data::TimeStamp now{cluon::time::now()};
+    // opendlv::proxy::SwitchStateRequest msg;
+    // msg.state(m_missionState);
+    // m_od4.send(msg, now, 1902);
     return true;
 }
 
