@@ -34,7 +34,7 @@ int32_t main(int32_t argc, char **argv) {
         std::cerr << "Usage:   " << argv[0] << " --cid=<OD4 session> mission=<Mission No> [--verbose]" << std::endl;
         std::cerr << "         --cid:    CID of the OD4Session to send and receive messages" << std::endl;
         std::cerr << "         --mission:index of the Mission" << std::endl;
-        std::cerr << "Example: " << argv[0] << " --cid=131 --mission=0 --frequency=66 --verbose" << std::endl;
+        std::cerr << "Example: " << argv[0] << " --cid=131 --mission=0 --frequency=66 --torqueRequest=120 --verbose" << std::endl;
     }
     else {
         const bool VERBOSE{commandlineArguments.count("verbose") != 0};
@@ -96,7 +96,8 @@ int32_t main(int32_t argc, char **argv) {
                         mission -> startMission("braketest");
                         break;
                     case asMission::AMI_INSPECTION:
-                        mission = new Inspection(od4, missionID, frequency, VERBOSE);
+                        uint16_t torqueRequest = static_cast<uint16_t>(std::stoi(commandlineArguments["torqueRequest"]));
+                        mission = new Inspection(od4, missionID, frequency, torqueRequest, VERBOSE);
                         mission -> startMission("inspection");
                         break;
                     case asMission::AMI_ACCELERATION:

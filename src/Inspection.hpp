@@ -19,8 +19,9 @@ private:
     float m_t;
     float m_dt;
     long m_start_timestamp;
+    int m_torqueReq;
 public:
-    Inspection(cluon::OD4Session&, int, int, bool);
+    Inspection(cluon::OD4Session&, int, int, int, bool);
     ~Inspection();
     bool create_data_trigger(); 
     bool remove_data_trigger();

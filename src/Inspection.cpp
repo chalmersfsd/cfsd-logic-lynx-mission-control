@@ -1,10 +1,11 @@
 #include "Inspection.hpp"
 
-Inspection::Inspection(cluon::OD4Session& od4, int missionID, int freq, bool VERBOSE)
+Inspection::Inspection(cluon::OD4Session& od4, int missionID, int freq, int torqueReq, bool VERBOSE)
   : MissionControl(od4, missionID, freq, VERBOSE)
   , m_t{0}
   , m_dt{0}
   , m_start_timestamp{0}
+  , m_torqueReq{torqueReq}
 {
 
 }
@@ -49,8 +50,8 @@ bool Inspection::step(){
     m_od4.send(steer, ts, 2801);
     
     opendlv::cfsdProxy::TorqueRequestDual torque;
-    torque.torqueLeft(40);
-    torque.torqueRight(40);
+    torque.torqueLeft(m_torqueReq);
+    torque.torqueRight(m_torqueReq);
     m_od4.send(torque, ts, 2101);
     
     if(m_VERBOSE){
