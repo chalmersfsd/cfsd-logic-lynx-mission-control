@@ -85,7 +85,9 @@ int32_t main(int32_t argc, char **argv) {
         };
         od4.dataTrigger(opendlv::proxy::SwitchStateReading::ID(), SwitchStateReading);
 
-        auto missionStep = [VERBOSE,&od4,&mission,&stateMachine,&missionID,&missionSelected,frequency]() -> bool{
+        uint16_t torqueRequest = static_cast<uint16_t>(std::stoi(commandlineArguments["torqueRequest"]));
+
+        auto missionStep = [VERBOSE,&od4,&mission,&stateMachine,&missionID,&missionSelected,frequency,torqueRequest]() -> bool{
             bool res = true;
             // initialization stage: if no mission is selected yet, and mission is none, and asState is ready
             if (missionSelected == false && missionID > 0 && stateMachine == asState::AS_READY){
@@ -96,7 +98,7 @@ int32_t main(int32_t argc, char **argv) {
                         mission -> startMission("braketest");
                         break;
                     case asMission::AMI_INSPECTION:
-                        uint16_t torqueRequest = static_cast<uint16_t>(std::stoi(commandlineArguments["torqueRequest"]));
+                        
                         mission = new Inspection(od4, missionID, frequency, torqueRequest, VERBOSE);
                         mission -> startMission("inspection");
                         break;
