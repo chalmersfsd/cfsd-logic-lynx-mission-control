@@ -16,8 +16,9 @@ class BrakeTest: public MissionControl
 {
 private:
     /* data */
+    float m_speedReq;
 public:
-    BrakeTest(cluon::OD4Session&, int, int, bool);
+    BrakeTest(cluon::OD4Session&, int, int, float, bool);
     ~BrakeTest();
     bool create_data_trigger(); 
     bool remove_data_trigger();

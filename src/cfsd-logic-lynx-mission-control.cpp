@@ -34,7 +34,7 @@ int32_t main(int32_t argc, char **argv) {
         std::cerr << "Usage:   " << argv[0] << " --cid=<OD4 session> mission=<Mission No> [--verbose]" << std::endl;
         std::cerr << "         --cid:    CID of the OD4Session to send and receive messages" << std::endl;
         std::cerr << "         --mission:index of the Mission" << std::endl;
-        std::cerr << "Example: " << argv[0] << " --cid=131 --mission=0 --frequency=66 --torqueRequest=120 --verbose" << std::endl;
+        std::cerr << "Example: " << argv[0] << " --cid=131 --mission=0 --frequency=66 --inspectionTorqueReq=120 --braketestVelocityReq=12 --verbose" << std::endl;
     }
     else {
         const bool VERBOSE{commandlineArguments.count("verbose") != 0};
@@ -85,22 +85,23 @@ int32_t main(int32_t argc, char **argv) {
         };
         od4.dataTrigger(opendlv::proxy::SwitchStateReading::ID(), SwitchStateReading);
 
-        uint16_t torqueRequest = static_cast<uint16_t>(std::stoi(commandlineArguments["torqueRequest"]));
+        uint16_t torqueReq = static_cast<uint16_t>(std::stoi(commandlineArguments["inspectionTorqueReq"]));
+        float velocityReq = static_cast<float>(std::stoi(commandlineArguments["braketestVelocityReq"]));
         uint16_t counterBeforeDriving = 0;
 
-        auto missionStep = [VERBOSE,&od4,&mission,&stateMachine,&missionID,&missionSelected,&counterBeforeDriving,frequency,torqueRequest]() -> bool{
+        auto missionStep = [VERBOSE,&od4,&mission,&stateMachine,&missionID,&missionSelected,&counterBeforeDriving,&frequency,&torqueReq,&velocityReq]() -> bool{
             bool res = true;
             // initialization stage: if no mission is selected yet, and mission is none, and asState is ready
             if (missionSelected == false && missionID > 0 && stateMachine == asState::AS_READY){
                 // create mission
                 switch (missionID) {
                     case asMission::AMI_BRAKETEST:
-                        mission = new BrakeTest(od4, missionID, frequency, VERBOSE);
+                        mission = new BrakeTest(od4, missionID, frequency, velocityReq, VERBOSE);
                         mission -> startMission("braketest");
                         break;
                     case asMission::AMI_INSPECTION:
                         
-                        mission = new Inspection(od4, missionID, frequency, torqueRequest, VERBOSE);
+                        mission = new Inspection(od4, missionID, frequency, torqueReq, VERBOSE);
                         mission -> startMission("inspection");
                         break;
                     case asMission::AMI_ACCELERATION:

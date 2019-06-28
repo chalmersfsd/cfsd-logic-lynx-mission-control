@@ -4,4 +4,4 @@ services:
     cfsd-mission-control:
         image: chalmersfsd/cfsd-logic-lynx-mission-control:test-inspection5
         network_mode: "host"
-        command: "--cid=131 --frequency=10 --verbose"
+        command: "--cid=131 --frequency=10 --inspectionTorqueReq=120 --braketestVelocityReq=12 --verbose"
