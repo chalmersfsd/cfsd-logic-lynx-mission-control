@@ -23,6 +23,7 @@
 #include "Mission-control.hpp"
 #include "Brake-test.hpp"
 #include "Inspection.hpp"
+#include "Autocross.hpp"
 #include "cfsd-logic-lynx-mission-control.hpp"
 #include <cstdint>
 #include <iostream>
@@ -34,7 +35,7 @@ int32_t main(int32_t argc, char **argv) {
         std::cerr << "Usage:   " << argv[0] << " --cid=<OD4 session> mission=<Mission No> [--verbose]" << std::endl;
         std::cerr << "         --cid:    CID of the OD4Session to send and receive messages" << std::endl;
         std::cerr << "         --mission:index of the Mission" << std::endl;
-        std::cerr << "Example: " << argv[0] << " --cid=131 --mission=0 --frequency=66 --inspectionTorqueReq=120 --braketestVelocityReq=12 --verbose" << std::endl;
+        std::cerr << "Example: " << argv[0] << " --cid=131 --mission=0 --frequency=66 --inspectionTorqueReq=120 --braketestVelocityReq=12 --steeringReq=20 --verbose" << std::endl;
     }
     else {
         const bool VERBOSE{commandlineArguments.count("verbose") != 0};
@@ -46,18 +47,15 @@ int32_t main(int32_t argc, char **argv) {
         if(commandlineArguments.count("mission") != 0){
             missionID = static_cast<uint16_t>(std::stoi(commandlineArguments["mission"]));
             if(VERBOSE){
-                std::cerr << "[info] \t Mission selected: "<< missionID << std::endl;
+                std::cout << "[info] \t Mission selected: "<< missionID << std::endl;
             }
         }else{
             std::cerr << "[info] \t Mission not selected! waiting for stateMachine" << std::endl;
         }
-        // if the frequency is not set, then it runs at 60Hz as default
-        uint16_t frequency = 60;
 
-        if (commandlineArguments.count("frequency") != 0)
-        {
-            frequency = static_cast<uint16_t>(std::stoi(commandlineArguments["frequency"]));
-        }
+        // if the frequency is not set, then it runs at 60Hz as default
+        uint16_t frequency = commandlineArguments.count("frequency") ? static_cast<uint16_t>(std::stoi(commandlineArguments["frequency"])) : 60;
+
         // Create sessions    
         cluon::OD4Session od4{cid};
         if(VERBOSE){
@@ -85,11 +83,14 @@ int32_t main(int32_t argc, char **argv) {
         };
         od4.dataTrigger(opendlv::proxy::SwitchStateReading::ID(), SwitchStateReading);
 
-        uint16_t torqueReq = static_cast<uint16_t>(std::stoi(commandlineArguments["inspectionTorqueReq"]));
-        float velocityReq = static_cast<float>(std::stoi(commandlineArguments["braketestVelocityReq"]));
+        // if not given, use default values
+        uint16_t torqueReq = commandlineArguments.count("inspectionTorqueReq") ? static_cast<uint16_t>(std::stoi(commandlineArguments["inspectionTorqueReq"])) : 120;
+        float velocityReq = commandlineArguments.count("braketestVelocityReq") ? static_cast<float>(std::stoi(commandlineArguments["braketestVelocityReq"])) : 12;
+        float steeringReq = commandlineArguments.count("steeringReq") ? static_cast<float>(std::stoi(commandlineArguments["steeringReq"])) : 20;
+        
         uint16_t counterBeforeDriving = 0;
 
-        auto missionStep = [VERBOSE,&od4,&mission,&stateMachine,&missionID,&missionSelected,&counterBeforeDriving,&frequency,&torqueReq,&velocityReq]() -> bool{
+        auto missionStep = [VERBOSE,&od4,&mission,&stateMachine,&missionID,&missionSelected,&counterBeforeDriving,&frequency,&torqueReq,&velocityReq,&steeringReq]() -> bool{
             bool res = true;
             // initialization stage: if no mission is selected yet, and mission is none, and asState is ready
             if (missionSelected == false && missionID > 0 && stateMachine == asState::AS_READY){
@@ -100,7 +101,6 @@ int32_t main(int32_t argc, char **argv) {
                         mission -> startMission("braketest");
                         break;
                     case asMission::AMI_INSPECTION:
-                        
                         mission = new Inspection(od4, missionID, frequency, torqueReq, VERBOSE);
                         mission -> startMission("inspection");
                         break;
@@ -118,7 +118,8 @@ int32_t main(int32_t argc, char **argv) {
                         std::cerr <<  "[Error] \t Mission ID " << missionID <<" has not implemented yet." << std::endl;
                         break;
                     case asMission::AMI_AUTOCROSS:
-                        //todo
+                        mission = new Autocross(od4, missionID, frequency, steeringReq, velocityReq, VERBOSE);
+                        mission -> startMission("autocross");
                         std::cerr <<  "[Error] \t Mission ID " << missionID <<" has not implemented yet." << std::endl;
                         break;
                     case asMission::AMI_MANUAL:
@@ -151,9 +152,11 @@ int32_t main(int32_t argc, char **argv) {
                         mission -> switchWaiting();
                         break;
                     case asState::AS_DRIVING: // when mission start, it run steps
-                        if (counterBeforeDriving++ < 2 * frequency)
+                        if (counterBeforeDriving < 2 * frequency){
                             // wait 2s for initial brake (0.5s) and ready-to-drive sound
+                            counterBeforeDriving++;
                             break;
+                        }
                         res = mission -> step();
                         if (!res){//if the step failed
                             mission->switchError();

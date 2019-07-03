@@ -60,7 +60,9 @@ bool Inspection::step(){
     }
     
     // After 25 s to 30 s the mission is finished
-    if (cluon::time::toMicroseconds(ts) - m_start_timestamp > 25000000) {
+    long dt = cluon::time::toMicroseconds(ts) - m_start_timestamp;
+    std::cout << "Timer: " << (double)dt / 1e6 << "s" << std::endl;
+    if (dt > 25000000) {
         m_missionFinished = true;
         std::cout << "Inspection finished" << std::endl;
     }
