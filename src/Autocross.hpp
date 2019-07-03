@@ -16,8 +16,9 @@ private:
     long m_start_timestamp;
     float m_steeringReq;
     float m_speedReq;
+    int m_missionTime;
 public:
-    Autocross(cluon::OD4Session&, int, int, float, float, bool);
+    Autocross(cluon::OD4Session&, int, int, float, float, int, bool);
     ~Autocross();
     bool create_data_trigger(); 
     bool remove_data_trigger();

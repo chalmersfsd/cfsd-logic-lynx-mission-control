@@ -35,7 +35,7 @@ int32_t main(int32_t argc, char **argv) {
         std::cerr << "Usage:   " << argv[0] << " --cid=<OD4 session> mission=<Mission No> [--verbose]" << std::endl;
         std::cerr << "         --cid:    CID of the OD4Session to send and receive messages" << std::endl;
         std::cerr << "         --mission:index of the Mission" << std::endl;
-        std::cerr << "Example: " << argv[0] << " --cid=131 --mission=0 --frequency=66 --inspectionTorqueReq=120 --braketestVelocityReq=12 --steeringReq=20 --verbose" << std::endl;
+        std::cerr << "Example: " << argv[0] << " --cid=131 --mission=0 --frequency=66 --inspectionTorqueReq=120 --braketestVelocityReq=12 --steeringReq=20 --missionTime=30 --verbose" << std::endl;
     }
     else {
         const bool VERBOSE{commandlineArguments.count("verbose") != 0};
@@ -87,10 +87,11 @@ int32_t main(int32_t argc, char **argv) {
         uint16_t torqueReq = commandlineArguments.count("inspectionTorqueReq") ? static_cast<uint16_t>(std::stoi(commandlineArguments["inspectionTorqueReq"])) : 120;
         float velocityReq = commandlineArguments.count("braketestVelocityReq") ? static_cast<float>(std::stoi(commandlineArguments["braketestVelocityReq"])) : 12;
         float steeringReq = commandlineArguments.count("steeringReq") ? static_cast<float>(std::stoi(commandlineArguments["steeringReq"])) : 20;
+        uint16_t missionTime = commandlineArguments.count("missionTime") ? static_cast<uint16_t>(std::stoi(commandlineArguments["missionTime"])) : 30;
         
         uint16_t counterBeforeDriving = 0;
 
-        auto missionStep = [VERBOSE,&od4,&mission,&stateMachine,&missionID,&missionSelected,&counterBeforeDriving,&frequency,&torqueReq,&velocityReq,&steeringReq]() -> bool{
+        auto missionStep = [VERBOSE,&od4,&mission,&stateMachine,&missionID,&missionSelected,&counterBeforeDriving,&frequency,&torqueReq,&velocityReq,&steeringReq,&missionTime]() -> bool{
             bool res = true;
             // initialization stage: if no mission is selected yet, and mission is none, and asState is ready
             if (missionSelected == false && missionID > 0 && stateMachine == asState::AS_READY){
@@ -118,7 +119,7 @@ int32_t main(int32_t argc, char **argv) {
                         std::cerr <<  "[Error] \t Mission ID " << missionID <<" has not implemented yet." << std::endl;
                         break;
                     case asMission::AMI_AUTOCROSS:
-                        mission = new Autocross(od4, missionID, frequency, steeringReq, velocityReq, VERBOSE);
+                        mission = new Autocross(od4, missionID, frequency, steeringReq, velocityReq, missionTime, VERBOSE);
                         mission -> startMission("autocross");
                         std::cerr <<  "[Error] \t Mission ID " << missionID <<" has not implemented yet." << std::endl;
                         break;

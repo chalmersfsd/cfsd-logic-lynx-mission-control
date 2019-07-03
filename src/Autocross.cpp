@@ -1,10 +1,11 @@
 #include "Autocross.hpp"
 
-Autocross::Autocross(cluon::OD4Session& od4, int missionID, int freq, float steeringReq, float speedReq, bool VERBOSE)
+Autocross::Autocross(cluon::OD4Session& od4, int missionID, int freq, float steeringReq, float speedReq, int missionTime, bool VERBOSE)
   : MissionControl(od4, missionID, freq, VERBOSE)
   , m_start_timestamp{0}
   , m_steeringReq{steeringReq}
   , m_speedReq{speedReq}
+  , m_missionTime{missionTime}
 {
 
 }
@@ -29,6 +30,7 @@ bool Autocross::remove_data_trigger(){
 }
 
 bool Autocross::init(){
+    m_missionTime *= 1e6; // convert second to microsecond
     if(m_VERBOSE){
         std::cout << "Autocross Initialize" << std::endl;
     }
@@ -54,10 +56,10 @@ bool Autocross::step(){
                   << "  speedReq: " << m_speedReq << "m/s" << std::endl;
     }
     
-    // After 25 s the mission is finished
+    // After sometime the mission is finished
     long dt = cluon::time::toMicroseconds(ts) - m_start_timestamp;
     std::cout << "Timer: " << (double)dt / 1e6 << "s" << std::endl;
-    if (dt > 25000000) {
+    if (dt > m_missionTime) {
         m_missionFinished = true;
         std::cout << "Autocross finished" << std::endl;
     }
