@@ -84,7 +84,7 @@ int32_t main(int32_t argc, char **argv) {
         od4.dataTrigger(opendlv::proxy::SwitchStateReading::ID(), SwitchStateReading);
 
         // if not given, use default values
-        uint16_t torqueReq = commandlineArguments.count("inspectionTorqueReq") ? static_cast<uint16_t>(std::stoi(commandlineArguments["inspectionTorqueReq"])) : 120;
+        uint16_t torqueReq = 30; // set a small constant torque request during inspection, to avoid accidentally setting too large torque which might cause damage
         float velocityReq = commandlineArguments.count("braketestVelocityReq") ? static_cast<float>(std::stoi(commandlineArguments["braketestVelocityReq"])) : 12;
         float steeringReq = commandlineArguments.count("steeringReq") ? static_cast<float>(std::stoi(commandlineArguments["steeringReq"])) : 20;
         uint16_t missionTime = commandlineArguments.count("missionTime") ? static_cast<uint16_t>(std::stoi(commandlineArguments["missionTime"])) : 30;
