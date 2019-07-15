@@ -46,9 +46,9 @@ bool Autocross::step(){
     speed.groundSpeed(m_speedReq);
     m_od4.send(speed, ts, 2201);
 
-    opendlv::proxy::GroundSteeringRequest steer;
-    steer.groundSteering(m_steeringReq);
-    m_od4.send(steer, ts, 2801);
+    // opendlv::proxy::GroundSteeringRequest steer;
+    // steer.groundSteering(m_steeringReq);
+    // m_od4.send(steer, ts, 2801);
     
     if(m_VERBOSE){
         std::cout << "Autocross step" << std::endl;
