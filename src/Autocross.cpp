@@ -42,9 +42,19 @@ bool Autocross::step(){
         return true;
 
     cluon::data::TimeStamp ts{cluon::time::now()};
-    opendlv::proxy::GroundSpeedRequest speed;
-    speed.groundSpeed(m_speedReq);
-    m_od4.send(speed, ts, 2201);
+    //opendlv::proxy::GroundSpeedRequest speed;
+    //speed.groundSpeed(m_speedReq);
+    //m_od4.send(speed, ts, 2201);
+
+
+    long dt = cluon::time::toMicroseconds(ts) - m_start_timestamp;
+    int tq = 20 * ((double)dt / 1e6);
+    if (tq > 100)
+        tq = 100;
+    opendlv::cfsdProxy::TorqueRequestDual torque;
+    torque.torqueLeft(tq);
+    torque.torqueRight(tq);
+    m_od4.send(torque, ts, 2101);
 
     // opendlv::proxy::GroundSteeringRequest steer;
     // steer.groundSteering(m_steeringReq);
@@ -57,12 +67,12 @@ bool Autocross::step(){
     }
     
     // After sometime the mission is finished
-    long dt = cluon::time::toMicroseconds(ts) - m_start_timestamp;
-    std::cout << "Timer: " << (double)dt / 1e6 << "s" << std::endl;
-    if (dt > m_missionTime) {
-        m_missionFinished = true;
-        std::cout << "Autocross finished" << std::endl;
-    }
+//    long dt = cluon::time::toMicroseconds(ts) - m_start_timestamp;
+//    std::cout << "Timer: " << (double)dt / 1e6 << "s" << std::endl;
+//if (dt > m_missionTime) {
+//        m_missionFinished = true;
+//        std::cout << "Autocross finished" << std::endl;
+//    }
     return true;
 }
 
