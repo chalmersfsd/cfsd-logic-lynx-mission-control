@@ -1,11 +1,10 @@
 #include "Autocross.hpp"
 
-Autocross::Autocross(cluon::OD4Session& od4, int missionID, int freq, float steeringReq, float speedReq, int missionTime, bool VERBOSE)
+Autocross::Autocross(cluon::OD4Session& od4, int missionID, int freq, float steeringReq, float speedReq, bool VERBOSE)
   : MissionControl(od4, missionID, freq, VERBOSE)
   , m_start_timestamp{0}
   , m_steeringReq{steeringReq}
   , m_speedReq{speedReq}
-  , m_missionTime{missionTime}
 {
 
 }
@@ -30,7 +29,6 @@ bool Autocross::remove_data_trigger(){
 }
 
 bool Autocross::init(){
-    m_missionTime *= 1e6; // convert second to microsecond
     if(m_VERBOSE){
         std::cout << "Autocross Initialize" << std::endl;
     }
@@ -42,9 +40,18 @@ bool Autocross::step(){
         return true;
 
     cluon::data::TimeStamp ts{cluon::time::now()};
-    opendlv::proxy::GroundSpeedRequest speed;
-    speed.groundSpeed(m_speedReq);
-    m_od4.send(speed, ts, 2201);
+    //opendlv::proxy::GroundSpeedRequest speed;
+    //speed.groundSpeed(m_speedReq);
+    //m_od4.send(speed, ts, 2201);
+
+    double dt = (double) (cluon::time::toMicroseconds(ts) - m_start_timestamp) / 1e6;
+    int tq = (int) (20 * dt);
+    if (tq > 100)
+        tq = 100;
+    opendlv::cfsdProxy::TorqueRequestDual torque;
+    torque.torqueLeft(tq);
+    torque.torqueRight(tq);
+    m_od4.send(torque, ts, 2101);
 
     // opendlv::proxy::GroundSteeringRequest steer;
     // steer.groundSteering(m_steeringReq);
@@ -56,13 +63,6 @@ bool Autocross::step(){
                   << "  speedReq: " << m_speedReq << "m/s" << std::endl;
     }
     
-    // After sometime the mission is finished
-    long dt = cluon::time::toMicroseconds(ts) - m_start_timestamp;
-    std::cout << "Timer: " << (double)dt / 1e6 << "s" << std::endl;
-    if (dt > m_missionTime) {
-        m_missionFinished = true;
-        std::cout << "Autocross finished" << std::endl;
-    }
     return true;
 }
 
