@@ -19,15 +19,37 @@
 
 #ifndef COLLECTOR_HPP
 #define COLLECTOR_HPP
-#include <mutex>
-#include <iterator>
-#include "pathplanner.hpp"
 
-#define PI 3.14159265
+#include <cmath>
+#include <iostream>
+#include <chrono>
+#include <algorithm>
+#include <mutex>
+#include <vector>
+#include <queue>
+#include <iterator>
+
+#include "cluon-complete.hpp"
+#include "opendlv-standard-message-set.hpp"
+
+struct Cone{
+    Cone():
+        m_objectId(0), m_x(0.0), m_y(0.0), m_color(0) {}
+    
+    Cone(uint32_t objectId, double x, double y,uint32_t color): 
+        m_objectId(objectId), m_x(x), m_y(y), m_color(color) {}
+    
+    ~Cone() = default;
+    
+    uint32_t m_objectId;
+    double m_x;
+    double m_y;
+    uint32_t m_color;
+};
 
 class Collector{
   public:
-    Collector(PathPlanner &planner, std::map<std::string, std::string>);
+    Collector(bool);
     ~Collector() = default;
 
     // CFSD19 modification
@@ -36,10 +58,9 @@ class Collector{
     void ProcessFrameCFSD19();
     
   public:
-    PathPlanner &m_planner;
     std::queue<Cone> m_currentConeFrame;
     
-    //Variables for creating cone frames
+    // Variables for creating cone frames
     std::mutex uncompleteFrameMutex;
     std::map<uint32_t, Cone> uncompleteFrame;
     uint32_t currentUncompleteFrameId;
@@ -50,21 +71,14 @@ class Collector{
     
     cluon::data::TimeStamp frameStart;
     cluon::data::TimeStamp frameEnd;
-    Point2D currentAim;
     bool m_verbose;
-    bool m_debug;
 
-    //Function for creating cone frames
+    // Function for creating cone frames
     void getObjectFrameStart(cluon::data::Envelope envelope);
     void getObjectFrameEnd(cluon::data::Envelope envelope);
-    void getObject(cluon::data::Envelope envelope);
     void getObjectType(cluon::data::Envelope envelope);
     void getObjectPosition(cluon::data::Envelope envelope);
-    void getEquilibrioception(cluon::data::Envelope envelope);
-    
-    //Visualiztion of aimpoints fro debugging
-    void getAimpoint(cluon::data::Envelope envelope);
-    
+    void getEquilibrioception(cluon::data::Envelope envelope);    
 };
 
 #endif

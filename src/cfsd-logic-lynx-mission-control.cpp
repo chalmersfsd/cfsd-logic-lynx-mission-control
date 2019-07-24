@@ -24,27 +24,29 @@
 #include "Brake-test.hpp"
 #include "Inspection.hpp"
 #include "Autocross.hpp"
+#include "Skidpad.hpp"
+
 #include <cstdint>
 #include <iostream>
 
 enum asState {
-    AS_OFF,
-    AS_READY, 
-    AS_DRIVING, 
-    AS_FINISHED,
-    AS_EMERGENCY,
-    AS_MANUAL
+    AS_OFF,         // 0
+    AS_READY,       // 1
+    AS_DRIVING,     // 2
+    AS_FINISHED,    // 3
+    AS_EMERGENCY,   // 4
+    AS_MANUAL       // 5
 };
 
 enum asMission {
-    AMI_NONE,
-    AMI_ACCELERATION, 
-    AMI_SKIDPAD, 
-    AMI_TRACKDRIVE, 
-    AMI_AUTOCROSS,
-    AMI_BRAKETEST,
-    AMI_INSPECTION,
-    AMI_MANUAL
+    AMI_NONE,           // 0
+    AMI_ACCELERATION,   // 1
+    AMI_SKIDPAD,        // 2
+    AMI_TRACKDRIVE,     // 3
+    AMI_AUTOCROSS,      // 4
+    AMI_BRAKETEST,      // 5
+    AMI_INSPECTION,     // 6
+    AMI_MANUAL          // 7
 };
 
 int32_t main(int32_t argc, char **argv) {
@@ -129,8 +131,8 @@ int32_t main(int32_t argc, char **argv) {
                         std::cerr <<  "[Error] \t Mission ID " << missionID <<" has not implemented yet." << std::endl;
                         break;
                     case asMission::AMI_SKIDPAD:
-                        std::cerr <<  "[Error] \t Mission ID " << missionID <<" has not implemented yet." << std::endl;
-                        //todo
+                        mission = new Skidpad(od4, missionID, 30, VERBOSE);
+                        mission -> startMission("skidpad");
                         break;
                     case asMission::AMI_TRACKDRIVE:
                         //todo
@@ -139,7 +141,6 @@ int32_t main(int32_t argc, char **argv) {
                     case asMission::AMI_AUTOCROSS:
                         mission = new Autocross(od4, missionID, frequency, steeringReq, velocityReq, VERBOSE);
                         mission -> startMission("autocross");
-                        std::cerr <<  "[Error] \t Mission ID " << missionID <<" has not implemented yet." << std::endl;
                         break;
                     case asMission::AMI_MANUAL:
                         //todo
