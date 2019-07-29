@@ -55,7 +55,12 @@ class Collector{
     // CFSD19 modification
     void CollectConesCFSD19();
     void GetCompleteFrameCFSD19();
-    void ProcessFrameCFSD19();
+    void ProcessFrameCFSD19(bool goRight);
+  
+  private:
+    bool compareCone(const Cone& c1, const Cone& c2) {
+      return (c1.m_x < c2.m_x);
+    }
     
   public:
     std::queue<Cone> m_currentConeFrame;

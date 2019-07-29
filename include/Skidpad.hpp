@@ -16,6 +16,7 @@ private:
     /* data */
     long m_start_timestamp;
     Collector m_collector;
+    bool m_goRight;
 public:
     Skidpad(cluon::OD4Session&, int, int, bool);
     ~Skidpad();

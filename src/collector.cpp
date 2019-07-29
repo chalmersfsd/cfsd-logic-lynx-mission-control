@@ -120,12 +120,14 @@ void Collector::getObjectPosition(cluon::data::Envelope envelope) {
             // from perception:
             // x: positive upward vertically
             // y: positive to left horizontally
-
+            uncompleteFrame[objectId].m_x = msg.x();
+            uncompleteFrame[objectId].m_y = msg.y();
+            
             // In path planner
             // x: postive to right horizontally
             // y: positive upward vertically
-            uncompleteFrame[objectId].m_x = -msg.y();
-            uncompleteFrame[objectId].m_y = msg.x();
+            // uncompleteFrame[objectId].m_x = -msg.y();
+            // uncompleteFrame[objectId].m_y = msg.x();
         }
     }
     if (m_verbose) {
@@ -146,7 +148,78 @@ void Collector::getEquilibrioception(cluon::data::Envelope envelope) {
     }
 }
 
-void Collector::ProcessFrameCFSD19() {
+void Collector::ProcessFrameCFSD19(bool goRight) {
     // Todo: filter cones here
-    std::cout << "Process frame" << std::endl;
+    if (!m_currentConeFrame.size()) {
+        std::cout << "Current frame has no cones!" << std::endl;
+        return;
+    }
+
+    if (m_verbose)
+        std::cout << "Current frame has: " << m_currentConeFrame.size() << " cones\n";
+    
+    //Copy cones of different colors to their own containers for processing
+    std::vector<Cone> tempYellowCones;
+    std::vector<Cone> tempBlueCones;
+    std::vector<Cone> tempOrangeCones;     
+    
+    while(m_currentConeFrame.size() >0) {
+        Cone cone = m_currentConeFrame.front();
+        switch (m_currentConeFrame.front().m_color) {
+            case 0: // yellow
+                tempYellowCones.push_back(cone);
+                if (m_verbose) std::cout << "a yellow cone " << std::endl;
+                break;
+            case 1: // blue
+                tempBlueCones.push_back(cone);
+                if (m_verbose) std::cout << "a blue cone " << std::endl;
+                break;
+            case 2: // orange
+                tempOrangeCones.push_back(cone);
+                if (m_verbose) std::cout << "an orange cone " << std::endl;
+                break;
+        }
+        // Done copying, delete pointers to free memory
+        m_currentConeFrame.pop();
+    }
+    if (m_verbose)
+        std::cout << "number of cones:" 
+                  << "\n    yellow " << tempYellowCones.size()
+                  << "\n      blue " << tempBlueCones.size()
+                  << "\n    orange " << tempOrangeCones.size()
+                  << std::endl;
+
+    /* coordinate from perception:
+     * x: positive forward
+     * y: positive leftward
+     */
+    // Sort cones in an increasing order based on cone discance (i.e. x value)
+    std::sort(tempYellowCones.begin(), tempYellowCones.end(), compareCone);
+    std::sort(tempBlueCones.begin(), tempBlueCones.end(), compareCone);
+    std::sort(tempOrangeCones.begin(), tempOrangeCones.end(), compareCone);
+
+    // If the car goes to right circle,
+    // erase yellow cones that are in the left side of the closest blue cone
+    if (goRight && tempBlueCones.size()) {
+        std::vector<Cone>::iterator closestBlue = tempBlueCones.begin();
+        for (auto yellow = tempYellowCones.begin(); yellow != tempYellowCones.end(); ) {
+            if (yellow->m_y > closestBlue->m_y)
+                tempYellowCones.erase(yellow);
+            else
+                yellow++;
+        }
+    }
+
+
+    // If the car goes to left circle,
+    // erase blue cones that are in the right side of the closest yellow cone
+    if (!goRight && tempYellowCones.size()) {
+        std::vector<Cone>::iterator closestYellow = tempYellowCones.begin();
+        for (auto blue = tempBlueCones.begin(); blue != tempBlueCones.end(); ) {
+            if (blue->m_y < closestYellow->m_y)
+                tempBlueCones.erase(blue);
+            else
+                blue++;
+        }
+    }
 }

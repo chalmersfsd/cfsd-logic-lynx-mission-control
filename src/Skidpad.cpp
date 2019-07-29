@@ -4,6 +4,7 @@ Skidpad::Skidpad(cluon::OD4Session& od4, int missionID, int freq, bool VERBOSE)
   : MissionControl(od4, missionID, freq, VERBOSE)
   , m_start_timestamp{0}
   , m_collector(VERBOSE)
+  , m_goRight{true}
 {
     init();
 }
@@ -42,7 +43,7 @@ bool Skidpad::create_data_trigger() {
     
     auto atFrequency{[this]() -> bool {
         m_collector.GetCompleteFrameCFSD19();
-        m_collector.ProcessFrameCFSD19();
+        m_collector.ProcessFrameCFSD19(m_goRight);
 
         // opendlv::logic::action::LocalPath localPath;
         // localPath.length(length);
