@@ -47,6 +47,8 @@ struct Cone{
     uint32_t m_color;
 };
 
+bool compareCone(const Cone& c1, const Cone& c2);
+
 class Collector{
   public:
     Collector(bool);
@@ -56,11 +58,6 @@ class Collector{
     void CollectConesCFSD19();
     void GetCompleteFrameCFSD19();
     void ProcessFrameCFSD19(bool goRight);
-  
-  private:
-    bool compareCone(const Cone& c1, const Cone& c2) {
-      return (c1.m_x < c2.m_x);
-    }
     
   public:
     std::queue<Cone> m_currentConeFrame;

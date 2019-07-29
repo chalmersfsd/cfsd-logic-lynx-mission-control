@@ -18,6 +18,11 @@
 */
 
 #include "collector.hpp"
+
+bool compareCone(const Cone& c1, const Cone& c2) {
+  return (c1.m_x < c2.m_x);
+}
+
 /*-------------------------------------------------------*/
 Collector::Collector(bool VERBOSE) : 
   m_currentConeFrame{}
