@@ -24,6 +24,7 @@
 #include "Brake-test.hpp"
 #include "Inspection.hpp"
 #include "Autocross.hpp"
+#include "Trackdrive.hpp"
 #include "Skidpad.hpp"
 
 #include <cstdint>

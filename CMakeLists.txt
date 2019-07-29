@@ -99,6 +99,7 @@ add_executable(${PROJECT_NAME}  ${CMAKE_CURRENT_SOURCE_DIR}/src/${PROJECT_NAME}.
                                 ${CMAKE_CURRENT_SOURCE_DIR}/src/Brake-test.cpp 
                                 ${CMAKE_CURRENT_SOURCE_DIR}/src/Inspection.cpp 
                                 ${CMAKE_CURRENT_SOURCE_DIR}/src/Autocross.cpp 
+                                ${CMAKE_CURRENT_SOURCE_DIR}/src/Trackdrive.cpp 
                                 ${CMAKE_CURRENT_SOURCE_DIR}/src/Skidpad.cpp 
                                 ${CMAKE_CURRENT_SOURCE_DIR}/src/collector.cpp 
                                 ${CMAKE_BINARY_DIR}/cluon-complete.hpp 
