@@ -136,8 +136,8 @@ int32_t main(int32_t argc, char **argv) {
                         mission -> startMission("skidpad");
                         break;
                     case asMission::AMI_TRACKDRIVE:
-                        //todo
-                        std::cerr <<  "[Error] \t Mission ID " << missionID <<" has not implemented yet." << std::endl;
+                        mission = new Trackdrive(od4, missionID, 30, velocityReq, VERBOSE);
+                        mission -> startMission("trackdrive");
                         break;
                     case asMission::AMI_AUTOCROSS:
                         mission = new Autocross(od4, missionID, frequency, steeringReq, velocityReq, VERBOSE);
