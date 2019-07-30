@@ -67,7 +67,7 @@ bool Trackdrive::step(){
 
     std::lock_guard<std::mutex> lock(m_posMutex);
     std::array<double, 2> distance = wgs84::toCartesian(m_startPos, m_currentPos);
-    if (distance[0] * distance[0] + distance[1] * distance[1] < 0.01)
+    if (dt > 60.0 && distance[0] * distance[0] + distance[1] * distance[1] < 0.01)
         if (++m_laps == MAX_LAPS)
             m_missionFinished = true;
     
