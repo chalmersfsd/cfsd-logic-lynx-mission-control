@@ -8,9 +8,8 @@
 #include "cluon-complete.hpp"
 #include "opendlv-standard-message-set.hpp"
 #include "cfsd-extended-message-set.hpp"
-#include "WGS84toCartesian.hpp"
+#include "collector.hpp"
 
-#define MAX_LAPS 1
 /********
  * 
  */
@@ -19,13 +18,17 @@ class Trackdrive: public MissionControl
 private:
     /* data */
     long m_start_timestamp;
-    float m_speedReq;
+    Collector m_collector;
+    pathplannerFlag m_flag;
+    int m_laps;
+    std::mutex m_gpsMutex;
+    bool m_atStart;
     std::array<double, 2> m_startPos;
     std::array<double, 2> m_currentPos;
-    std::mutex m_posMutex;
-    int m_laps;
+    double m_gpsDistThres2;
+    bool m_isAwayFromStart;
 public:
-    Trackdrive(cluon::OD4Session&, int, int, float, bool);
+    Trackdrive(cluon::OD4Session&, int, int, double, bool);
     ~Trackdrive();
     bool create_data_trigger(); 
     bool remove_data_trigger();

@@ -1,13 +1,17 @@
 #include "Trackdrive.hpp"
 
-Trackdrive::Trackdrive(cluon::OD4Session& od4, int missionID, int freq, float speedReq, bool VERBOSE)
+Trackdrive::Trackdrive(cluon::OD4Session& od4, int missionID, int freq, double gpsDistThres, bool VERBOSE)
   : MissionControl(od4, missionID, freq, VERBOSE)
   , m_start_timestamp{0}
-  , m_speedReq{speedReq}
+  , m_collector(VERBOSE)
+  , m_flag{pathplannerFlag::AUTO}
+  , m_laps{0}
+  , m_gpsMutex{}
+  , m_atStart{true}
   , m_startPos{}
   , m_currentPos{}
-  , m_posMutex{}
-  , m_laps{0}
+  , m_gpsDistThres2{gpsDistThres*gpsDistThres}
+  , m_isAwayFromStart{false}
 {
 
 }
@@ -18,13 +22,41 @@ Trackdrive::~Trackdrive()
 }
 
 bool Trackdrive::create_data_trigger(){
-    auto onGeodeticWgs84Reading{[this](cluon::data::Envelope &&envelope) {
-        if (envelope.senderStamp() == 112) {
-            std::lock_guard<std::mutex> lock(m_posMutex);
-            auto msg = cluon::extractMessage<opendlv::proxy::GeodeticWgs84Reading>(std::move(envelope));
-            m_currentPos = {msg.latitude(), msg.longitude()};
-        }
+    auto onObjectFrameStart{[this](cluon::data::Envelope &&envelope) {
+        m_collector.getObjectFrameStart(envelope);
     }};
+
+    auto onObjectFrameEnd{[this](cluon::data::Envelope &&envelope) {
+        m_collector.getObjectFrameEnd(envelope);
+    }};
+
+    auto onObjectType{[this](cluon::data::Envelope &&envelope) {
+        m_collector.getObjectType(envelope);
+    }};
+
+    auto onObjectPosition{[this](cluon::data::Envelope &&envelope) {
+        m_collector.getObjectPosition(envelope);
+    }};
+
+    auto onEquilibrioception{[this](cluon::data::Envelope &&envelope) {
+        m_collector.getEquilibrioception(envelope);
+    }};
+
+    auto onGeodeticWgs84Reading{[this](cluon::data::Envelope &&envelope) {
+        std::lock_guard<std::mutex> lock(m_gpsMutex);
+        auto msg = cluon::extractMessage<opendlv::proxy::GeodeticWgs84Reading>(std::move(envelope));
+        if (m_atStart) {
+            m_startPos = {msg.latitude(), msg.longitude()};
+            m_atStart = false;
+        }
+        m_currentPos = {msg.latitude(), msg.longitude()};
+    }};
+
+    m_od4.dataTrigger(opendlv::logic::perception::ObjectFrameStart::ID(), onObjectFrameStart);
+    m_od4.dataTrigger(opendlv::logic::perception::ObjectFrameEnd::ID(), onObjectFrameEnd);
+    m_od4.dataTrigger(opendlv::logic::perception::ObjectType::ID(), onObjectType);
+    m_od4.dataTrigger(opendlv::logic::perception::ObjectPosition::ID(), onObjectPosition);
+    m_od4.dataTrigger(opendlv::logic::sensation::Equilibrioception::ID(), onEquilibrioception);
     m_od4.dataTrigger(opendlv::proxy::GeodeticWgs84Reading::ID(), onGeodeticWgs84Reading);
 
     if(m_VERBOSE){
@@ -52,32 +84,43 @@ bool Trackdrive::step(){
         return true;
 
     cluon::data::TimeStamp ts{cluon::time::now()};
-    //opendlv::proxy::GroundSpeedRequest speed;
-    //speed.groundSpeed(m_speedReq);
-    //m_od4.send(speed, ts, 2201);
+    // opendlv::proxy::GroundSpeedRequest speed;
+    // speed.groundSpeed(m_speedReq);
+    // m_od4.send(speed, ts, 2201);
 
-    double dt = (double) (cluon::time::toMicroseconds(ts) - m_start_timestamp) / 1e6;
-    int tq = (int) (20 * dt);
-    if (tq > 100)
-        tq = 100;
-    opendlv::cfsdProxy::TorqueRequestDual torque;
-    torque.torqueLeft(tq);
-    torque.torqueRight(tq);
-    m_od4.send(torque, ts, 2101);
+    // double dt = (double) (cluon::time::toMicroseconds(ts) - m_start_timestamp) / 1e6;
+    // int tq = (int) (20 * dt);
+    // if (tq > 100)
+    //     tq = 100;
+    // opendlv::cfsdProxy::TorqueRequestDual torque;
+    // torque.torqueLeft(tq);
+    // torque.torqueRight(tq);
+    // m_od4.send(torque, ts, 2101);
 
-    std::lock_guard<std::mutex> lock(m_posMutex);
+    m_collector.GetCompleteFrameCFSD19();
+    int numOrangeCones = m_collector.ProcessFrameCFSD19();
+
+    std::lock_guard<std::mutex> lock(m_gpsMutex);
     std::array<double, 2> distance = wgs84::toCartesian(m_startPos, m_currentPos);
-    if (dt > 60.0 && distance[0] * distance[0] + distance[1] * distance[1] < 0.01)
-        if (++m_laps == MAX_LAPS)
-            m_missionFinished = true;
-    
-    if(m_VERBOSE){
-        std::cout << "Trackdrive step"
-                  << "\n  #laps: " << m_laps
-                  << "\n  start geolocation:   " << m_startPos[0] << ", " << m_startPos[1]
-                  << "\n  current geolocation: " << m_currentPos[0] << ", " << m_currentPos[1]
-                  << "\n  cartesian distance:  " << distance[0] << ", " << distance[1] << std::endl;
+    double d = distance[0]*distance[0] + distance[1]*distance[1];
+    if (d < m_gpsDistThres2) {
+        if (m_isAwayFromStart && numOrangeCones > 1) {
+            m_laps++;
+            m_isAwayFromStart = false;
+        }
     }
+    else {
+        m_isAwayFromStart = true;
+    }
+
+    opendlv::proxy::SwitchStateRequest flagMsg;
+    flagMsg.state(m_flag);
+    m_od4.send(flagMsg, cluon::time::now(), 2901);
+
+    m_missionFinished = (m_laps == 10);
+
+    if (m_VERBOSE)
+        std::cout << "Trackdrive step: " << m_laps << " laps" << std::endl;
     
     return true;
 }
@@ -91,8 +134,6 @@ bool Trackdrive::abort(){
 
 bool Trackdrive::wait(){
     m_start_timestamp = cluon::time::toMicroseconds(cluon::time::now());
-    std::lock_guard<std::mutex> lock(m_posMutex);
-    m_startPos = m_currentPos;
     if(m_VERBOSE){
         std::cout << "Trackdrive Waiting" << std::endl;
     }

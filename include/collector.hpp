@@ -31,6 +31,7 @@
 
 #include "cluon-complete.hpp"
 #include "opendlv-standard-message-set.hpp"
+#include "WGS84toCartesian.hpp"
 
 struct Cone{
     Cone():
@@ -57,7 +58,7 @@ class Collector{
     // CFSD19 modification
     void CollectConesCFSD19();
     void GetCompleteFrameCFSD19();
-    void ProcessFrameCFSD19(bool goRight);
+    int ProcessFrameCFSD19();
     
   public:
     std::queue<Cone> m_currentConeFrame;
@@ -80,7 +81,7 @@ class Collector{
     void getObjectFrameEnd(cluon::data::Envelope envelope);
     void getObjectType(cluon::data::Envelope envelope);
     void getObjectPosition(cluon::data::Envelope envelope);
-    void getEquilibrioception(cluon::data::Envelope envelope);    
+    void getEquilibrioception(cluon::data::Envelope envelope);
 };
 
 #endif

@@ -6,6 +6,12 @@
 #include "cfsd-extended-message-set.hpp"
 #include <string>
 
+enum pathplannerFlag {
+    AUTO,   // 0
+    BLUE,   // 1
+    YELLOW, // 2
+    PARKING // 3
+};
 
 enum MissionState{
     M_WAITING,

@@ -52,12 +52,15 @@ enum asMission {
 
 int32_t main(int32_t argc, char **argv) {
     auto commandlineArguments = cluon::getCommandlineArguments(argc, argv);
-    if (0 == commandlineArguments.count("cid")) {
+    if (0 == commandlineArguments.count("cid") ||
+        0 == commandlineArguments.count("mapfile")) {
         std::cerr << argv[0] << "Mission control." << std::endl;
         std::cerr << "Usage:   " << argv[0] << " --cid=<OD4 session> mission=<Mission No> [--verbose]" << std::endl;
         std::cerr << "         --cid:    CID of the OD4Session to send and receive messages" << std::endl;
         std::cerr << "         --mission:index of the Mission" << std::endl;
-        std::cerr << "Example: " << argv[0] << " --cid=131 --mission=0 --frequency=66 --inspectionTorqueReq=120 --braketestVelocityReq=12 --steeringReq=20 --verbose" << std::endl;
+        std::cerr << "Example: " << argv[0] << " --cid=131 --mission=0 --frequency=66"
+                  << " --inspectionTorqueReq=120 --braketestVelocityReq=12 --steeringReq=20"
+                  << " --gpsDistThres=1 --verbose" << std::endl;
     }
     else {
         const bool VERBOSE{commandlineArguments.count("verbose") != 0};
@@ -109,7 +112,7 @@ int32_t main(int32_t argc, char **argv) {
         uint16_t torqueReq = 30; // set a small constant torque request during inspection, to avoid accidentally setting too large torque which might cause damage
         float velocityReq = commandlineArguments.count("braketestVelocityReq") ? static_cast<float>(std::stoi(commandlineArguments["braketestVelocityReq"])) : 12;
         float steeringReq = commandlineArguments.count("steeringReq") ? static_cast<float>(std::stoi(commandlineArguments["steeringReq"])) : 20;
-        
+        double gpsDistThres = commandlineArguments.count("gpsDistThres") ? static_cast<double>(std::stoi(commandlineArguments["gpsDistThres"])) : 1;
         uint16_t counterBeforeDriving = 0;
 
         auto missionStep = [&]() -> bool{
@@ -132,11 +135,11 @@ int32_t main(int32_t argc, char **argv) {
                         std::cerr <<  "[Error] \t Mission ID " << missionID <<" has not implemented yet." << std::endl;
                         break;
                     case asMission::AMI_SKIDPAD:
-                        mission = new Skidpad(od4, missionID, 30, VERBOSE);
+                        mission = new Skidpad(od4, missionID, 30, gpsDistThres, VERBOSE);
                         mission -> startMission("skidpad");
                         break;
                     case asMission::AMI_TRACKDRIVE:
-                        mission = new Trackdrive(od4, missionID, 30, velocityReq, VERBOSE);
+                        mission = new Trackdrive(od4, missionID, 30, gpsDistThres, VERBOSE);
                         mission -> startMission("trackdrive");
                         break;
                     case asMission::AMI_AUTOCROSS:

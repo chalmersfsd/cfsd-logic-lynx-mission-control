@@ -7,18 +7,28 @@
 #include "opendlv-standard-message-set.hpp"
 #include "cfsd-extended-message-set.hpp"
 #include "collector.hpp"
+
 /********
  * 
  */
+
 class Skidpad: public MissionControl
 {
 private:
     /* data */
     long m_start_timestamp;
     Collector m_collector;
-    bool m_goRight;
+    pathplannerFlag m_flag;
+    int m_laps;
+    std::mutex m_gpsMutex;
+    bool m_atStart;
+    bool m_reachIntersection;
+    std::array<double, 2> m_startPos;
+    std::array<double, 2> m_currentPos;
+    double m_gpsDistThres2;
+    bool m_isAwayFromStart;
 public:
-    Skidpad(cluon::OD4Session&, int, int, bool);
+    Skidpad(cluon::OD4Session&, int, int, double, bool);
     ~Skidpad();
     bool create_data_trigger(); 
     bool remove_data_trigger();
