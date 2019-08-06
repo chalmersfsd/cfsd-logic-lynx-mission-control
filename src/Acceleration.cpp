@@ -12,14 +12,15 @@ Acceleration::~Acceleration()
 }
 
 bool Acceleration::create_data_trigger(){
-    auto SwitchStateReading = [VERBOSE,&stateMachine,&missionID,&missionSelected](cluon::data::Envelope &&env){
-        opendlv::proxy::SwitchStateReading p = cluon::extractMessage<opendlv::proxy::SwitchStateReading>(std::move(env));
-        
-    };
-    od4.dataTrigger(opendlv::proxy::SwitchStateReading::ID(), SwitchStateReading);
-
     if(m_VERBOSE){
         std::cout << "Created Acceleration Data trigger" << std::endl;
+    }
+    return true;
+}
+
+bool Acceleration::remove_data_trigger(){
+    if (m_VERBOSE){
+        std::cout << "Remove Acceleration Data Trigger" << std::endl;
     }
     return true;
 }

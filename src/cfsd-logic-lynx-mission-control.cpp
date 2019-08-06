@@ -23,6 +23,7 @@
 #include "Mission-control.hpp"
 #include "Brake-test.hpp"
 #include "Inspection.hpp"
+#include "Acceleration.hpp"
 #include "Autocross.hpp"
 #include "Trackdrive.hpp"
 #include "Skidpad.hpp"
@@ -130,9 +131,8 @@ int32_t main(int32_t argc, char **argv) {
                         mission -> startMission("inspection");
                         break;
                     case asMission::AMI_ACCELERATION:
-                        // mission = new Acceleration(od4, missionID, frequency, VERBOSE);
-                        // mission -> startMission("acceleration");
-                        std::cerr <<  "[Error] \t Mission ID " << missionID <<" has not implemented yet." << std::endl;
+                        mission = new Acceleration(od4, missionID, frequency, VERBOSE);
+                        mission -> startMission("acceleration");
                         break;
                     case asMission::AMI_SKIDPAD:
                         mission = new Skidpad(od4, missionID, 30, gpsDistThres, VERBOSE);

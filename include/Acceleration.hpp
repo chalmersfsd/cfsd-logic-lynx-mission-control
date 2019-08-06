@@ -30,6 +30,7 @@ public:
     Acceleration(cluon::OD4Session&, int, int, bool);
     ~Acceleration();
     bool create_data_trigger(); 
+    bool remove_data_trigger();
     bool wait();
     bool init();
     bool step();
