@@ -11,7 +11,7 @@ MissionControl::MissionControl(cluon::OD4Session& od4, int missionID, int freq, 
   , m_VERBOSE{VERBOSE}
 {
     if(m_VERBOSE){
-        std::cerr <<  "MissionControl Created" << std::endl;
+        std::cout << "MissionControl Created" << std::endl;
     }
 
 }
