@@ -1,9 +1,9 @@
 #include "Trackdrive.hpp"
 
-Trackdrive::Trackdrive(cluon::OD4Session& od4, int missionID, int freq, double gpsDistThres, bool VERBOSE)
+Trackdrive::Trackdrive(cluon::OD4Session& od4, int missionID, int freq, double gpsDistThres, int laps, bool VERBOSE)
   : MissionControl(od4, missionID, freq, VERBOSE)
-  , m_start_timestamp{0}
-  , m_collector(VERBOSE)
+  // , m_startTimestamp{0}
+  , m_maxLaps{laps}
   , m_flag{pathplannerFlag::AUTO}
   , m_laps{0}
   , m_gpsMutex{}
@@ -88,7 +88,7 @@ bool Trackdrive::step(){
     // speed.groundSpeed(m_speedReq);
     // m_od4.send(speed, ts, 2201);
 
-    // double dt = (double) (cluon::time::toMicroseconds(ts) - m_start_timestamp) / 1e6;
+    // double dt = (double) (cluon::time::toMicroseconds(ts) - m_startTimestamp) / 1e6;
     // int tq = (int) (20 * dt);
     // if (tq > 100)
     //     tq = 100;
@@ -117,7 +117,7 @@ bool Trackdrive::step(){
     flagMsg.state(m_flag);
     m_od4.send(flagMsg, cluon::time::now(), 2901);
 
-    m_missionFinished = (m_laps == 10);
+    m_missionFinished = (m_laps == m_maxLaps);
 
     if (m_VERBOSE)
         std::cout << "Trackdrive step: " << m_laps << " laps" << std::endl;
@@ -133,7 +133,7 @@ bool Trackdrive::abort(){
 }
 
 bool Trackdrive::wait(){
-    m_start_timestamp = cluon::time::toMicroseconds(cluon::time::now());
+    // m_startTimestamp = cluon::time::toMicroseconds(cluon::time::now());
     if(m_VERBOSE){
         std::cout << "Trackdrive Waiting" << std::endl;
     }

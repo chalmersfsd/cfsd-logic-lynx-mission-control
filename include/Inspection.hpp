@@ -18,7 +18,7 @@ private:
     /* data */
     float m_t;
     float m_dt;
-    long m_start_timestamp;
+    long m_startTimestamp;
     int m_torqueReq;
 public:
     Inspection(cluon::OD4Session&, int, int, int, bool);

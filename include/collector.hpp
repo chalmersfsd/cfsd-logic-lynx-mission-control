@@ -31,6 +31,7 @@
 
 #include "cluon-complete.hpp"
 #include "opendlv-standard-message-set.hpp"
+#include "cfsd-extended-message-set.hpp"
 #include "WGS84toCartesian.hpp"
 
 struct Cone{

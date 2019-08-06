@@ -6,7 +6,6 @@
 #include "cluon-complete.hpp"
 #include "opendlv-standard-message-set.hpp"
 #include "cfsd-extended-message-set.hpp"
-#include "collector.hpp"
 
 /********
  * 
@@ -16,8 +15,7 @@ class Skidpad: public MissionControl
 {
 private:
     /* data */
-    long m_start_timestamp;
-    Collector m_collector;
+    // long m_startTimestamp;
     pathplannerFlag m_flag;
     int m_laps;
     std::mutex m_gpsMutex;

@@ -1,9 +1,7 @@
 #ifndef MISSIONCONTROLL_H
 #define MISSIONCONTROLL_H
 
-#include "cluon-complete.hpp"
-#include "opendlv-standard-message-set.hpp"
-#include "cfsd-extended-message-set.hpp"
+#include "collector.hpp"
 #include <string>
 
 enum pathplannerFlag {
@@ -27,6 +25,7 @@ class MissionControl
 protected:
     /* data */
     cluon::OD4Session &m_od4;
+    Collector m_collector;
 public:
     MissionControl(cluon::OD4Session&, int, int, bool);
     virtual ~MissionControl();

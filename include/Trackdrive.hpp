@@ -8,7 +8,6 @@
 #include "cluon-complete.hpp"
 #include "opendlv-standard-message-set.hpp"
 #include "cfsd-extended-message-set.hpp"
-#include "collector.hpp"
 
 /********
  * 
@@ -17,8 +16,8 @@ class Trackdrive: public MissionControl
 {
 private:
     /* data */
-    long m_start_timestamp;
-    Collector m_collector;
+    // long m_startTimestamp;
+    int m_maxLaps;
     pathplannerFlag m_flag;
     int m_laps;
     std::mutex m_gpsMutex;
@@ -28,7 +27,7 @@ private:
     double m_gpsDistThres2;
     bool m_isAwayFromStart;
 public:
-    Trackdrive(cluon::OD4Session&, int, int, double, bool);
+    Trackdrive(cluon::OD4Session&, int, int, double, int, bool);
     ~Trackdrive();
     bool create_data_trigger(); 
     bool remove_data_trigger();

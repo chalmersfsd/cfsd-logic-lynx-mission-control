@@ -2,6 +2,7 @@
 
 MissionControl::MissionControl(cluon::OD4Session& od4, int missionID, int freq, bool VERBOSE)
   : m_od4{od4}
+  , m_collector(VERBOSE)
   , m_missionID{missionID}
   , m_missionState{0}
   , m_freq{freq}

@@ -162,22 +162,28 @@ int Collector::ProcessFrameCFSD19() {
     if (m_verbose)
         std::cout << "Current frame has: " << m_currentConeFrame.size() << " cones\n";
     
-    //Copy cones of different colors to their own containers for processing
-    std::vector<Cone> tempYellowCones;
-    std::vector<Cone> tempBlueCones;
-    std::vector<Cone> tempOrangeCones;     
+    // Copy cones of different colors to their own containers for processing
+    // std::vector<Cone> tempYellowCones;
+    // std::vector<Cone> tempBlueCones;
+    // std::vector<Cone> tempOrangeCones;     
     
+    int numBlueCones = 0;
+    int numYellowCones = 0;
+    int numOrangeCones = 0;
     while(m_currentConeFrame.size() >0) {
         Cone cone = m_currentConeFrame.front();
         switch (m_currentConeFrame.front().m_color) {
             case 0: // yellow
-                tempYellowCones.push_back(cone);
+                numYellowCones++;
+                // tempYellowCones.push_back(cone);
                 break;
             case 1: // blue
-                tempBlueCones.push_back(cone);
+                numBlueCones++;
+                // tempBlueCones.push_back(cone);
                 break;
             case 2: // orange
-                tempOrangeCones.push_back(cone);
+                numOrangeCones++;
+                // tempOrangeCones.push_back(cone);
                 break;
         }
         // Done copying, delete pointers to free memory
@@ -185,11 +191,11 @@ int Collector::ProcessFrameCFSD19() {
     }
     if (m_verbose) {
         std::cout << "number of cones:" 
-                  << "\n    yellow " << tempYellowCones.size()
-                  << "\n      blue " << tempBlueCones.size()
-                  << "\n    orange " << tempOrangeCones.size()
+                  << "\n    yellow " << numYellowCones
+                  << "\n      blue " << numBlueCones
+                  << "\n    orange " << numOrangeCones
                   << std::endl;
     }
 
-    return tempOrangeCones.size();
+    return numOrangeCones;
 }

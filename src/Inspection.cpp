@@ -4,7 +4,7 @@ Inspection::Inspection(cluon::OD4Session& od4, int missionID, int freq, int torq
   : MissionControl(od4, missionID, freq, VERBOSE)
   , m_t{0}
   , m_dt{0}
-  , m_start_timestamp{0}
+  , m_startTimestamp{0}
   , m_torqueReq{torqueReq}
 {
 
@@ -60,7 +60,7 @@ bool Inspection::step(){
     }
     
     // After 25 s to 30 s the mission is finished
-    long dt = cluon::time::toMicroseconds(ts) - m_start_timestamp;
+    long dt = cluon::time::toMicroseconds(ts) - m_startTimestamp;
     std::cout << "Timer: " << (double)dt / 1e6 << "s" << std::endl;
     if (dt > 25000000) {
         m_missionFinished = true;
@@ -78,7 +78,7 @@ bool Inspection::abort(){
 }
 
 bool Inspection::wait(){
-    m_start_timestamp = cluon::time::toMicroseconds(cluon::time::now());
+    m_startTimestamp = cluon::time::toMicroseconds(cluon::time::now());
     if(m_VERBOSE){
         std::cout << "Inspection Waiting" << std::endl;
     }

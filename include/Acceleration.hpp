@@ -25,9 +25,14 @@ class Acceleration: public MissionControl
 {
 private:
     /* data */
-    
+    float m_speedReq;
+    std::mutex m_gpsMutex;
+    bool m_atStart;
+    std::array<double, 2> m_startPos;
+    std::array<double, 2> m_currentPos;
+    long m_endTimestamp;
 public:
-    Acceleration(cluon::OD4Session&, int, int, bool);
+    Acceleration(cluon::OD4Session&, int, int, float, bool);
     ~Acceleration();
     bool create_data_trigger(); 
     bool remove_data_trigger();

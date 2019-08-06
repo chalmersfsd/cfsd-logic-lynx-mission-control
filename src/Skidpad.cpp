@@ -2,8 +2,7 @@
 
 Skidpad::Skidpad(cluon::OD4Session& od4, int missionID, int freq, double gpsDistThres, bool VERBOSE)
   : MissionControl(od4, missionID, freq, VERBOSE)
-  , m_start_timestamp{0}
-  , m_collector(VERBOSE)
+  // , m_startTimestamp{0}
   , m_flag{pathplannerFlag::AUTO}
   , m_laps{0}
   , m_gpsMutex{}
@@ -90,7 +89,7 @@ bool Skidpad::step(){
     // speed.groundSpeed(m_speedReq);
     // m_od4.send(speed, ts, 2201);
 
-    // double dt = (double) (cluon::time::toMicroseconds(ts) - m_start_timestamp) / 1e6;
+    // double dt = (double) (cluon::time::toMicroseconds(ts) - m_startTimestamp) / 1e6;
     // int tq = (int) (20 * dt);
     // if (tq > 100)
     //     tq = 100;
@@ -159,7 +158,7 @@ bool Skidpad::abort(){
 }
 
 bool Skidpad::wait(){
-    m_start_timestamp = cluon::time::toMicroseconds(cluon::time::now());
+    // m_startTimestamp = cluon::time::toMicroseconds(cluon::time::now());
     if(m_VERBOSE){
         std::cout << "Skidpad Waiting" << std::endl;
     }

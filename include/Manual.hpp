@@ -1,5 +1,5 @@
-#ifndef AUTOCROSS_H
-#define AUTOCROSS_H
+#ifndef MANUAL_H
+#define MANUAL_H
 
 
 #include "Mission-control.hpp"
@@ -9,16 +9,16 @@
 /********
  * 
  */
-class Autocross: public MissionControl
+class Manual: public MissionControl
 {
 private:
     /* data */
-    long m_start_timestamp;
+    long m_startTimestamp;
     float m_steeringReq;
     float m_speedReq;
 public:
-    Autocross(cluon::OD4Session&, int, int, float, float, bool);
-    ~Autocross();
+    Manual(cluon::OD4Session&, int, int, float, float, bool);
+    ~Manual();
     bool create_data_trigger(); 
     bool remove_data_trigger();
     bool wait();

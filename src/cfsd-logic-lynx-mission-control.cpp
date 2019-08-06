@@ -24,9 +24,9 @@
 #include "Brake-test.hpp"
 #include "Inspection.hpp"
 #include "Acceleration.hpp"
-#include "Autocross.hpp"
 #include "Trackdrive.hpp"
 #include "Skidpad.hpp"
+#include "Manual.hpp"
 
 #include <cstdint>
 #include <iostream>
@@ -61,7 +61,7 @@ int32_t main(int32_t argc, char **argv) {
         std::cerr << "         --mission:index of the Mission" << std::endl;
         std::cerr << "Example: " << argv[0] << " --cid=131 --mission=0 --frequency=66"
                   << " --inspectionTorqueReq=120 --braketestVelocityReq=12 --steeringReq=20"
-                  << " --gpsDistThres=1 --verbose" << std::endl;
+                  << " --accelerationVelocityReq=100 --gpsDistThres=1 --verbose" << std::endl;
     }
     else {
         const bool VERBOSE{commandlineArguments.count("verbose") != 0};
@@ -111,8 +111,9 @@ int32_t main(int32_t argc, char **argv) {
 
         // if not given, use default values
         uint16_t torqueReq = 30; // set a small constant torque request during inspection, to avoid accidentally setting too large torque which might cause damage
-        float velocityReq = commandlineArguments.count("braketestVelocityReq") ? static_cast<float>(std::stoi(commandlineArguments["braketestVelocityReq"])) : 12;
+        float btSpeedReq = commandlineArguments.count("braketestVelocityReq") ? static_cast<float>(std::stoi(commandlineArguments["braketestVelocityReq"])) : 12;
         float steeringReq = commandlineArguments.count("steeringReq") ? static_cast<float>(std::stoi(commandlineArguments["steeringReq"])) : 20;
+        float accSpeedReq = commandlineArguments.count("accelerationVelocityReq") ? static_cast<float>(std::stoi(commandlineArguments["braketestVelocityReq"])) : 100;
         double gpsDistThres = commandlineArguments.count("gpsDistThres") ? static_cast<double>(std::stoi(commandlineArguments["gpsDistThres"])) : 1;
         uint16_t counterBeforeDriving = 0;
 
@@ -123,7 +124,7 @@ int32_t main(int32_t argc, char **argv) {
                 // create mission
                 switch (missionID) {
                     case asMission::AMI_BRAKETEST:
-                        mission = new BrakeTest(od4, missionID, frequency, velocityReq, VERBOSE);
+                        mission = new BrakeTest(od4, missionID, frequency, btSpeedReq, VERBOSE);
                         mission -> startMission("braketest");
                         break;
                     case asMission::AMI_INSPECTION:
@@ -131,7 +132,7 @@ int32_t main(int32_t argc, char **argv) {
                         mission -> startMission("inspection");
                         break;
                     case asMission::AMI_ACCELERATION:
-                        mission = new Acceleration(od4, missionID, frequency, VERBOSE);
+                        mission = new Acceleration(od4, missionID, frequency, accSpeedReq, VERBOSE);
                         mission -> startMission("acceleration");
                         break;
                     case asMission::AMI_SKIDPAD:
@@ -139,16 +140,19 @@ int32_t main(int32_t argc, char **argv) {
                         mission -> startMission("skidpad");
                         break;
                     case asMission::AMI_TRACKDRIVE:
-                        mission = new Trackdrive(od4, missionID, 30, gpsDistThres, VERBOSE);
+                        // lap = 10
+                        mission = new Trackdrive(od4, missionID, 30, gpsDistThres, 10, VERBOSE);
                         mission -> startMission("trackdrive");
                         break;
                     case asMission::AMI_AUTOCROSS:
-                        mission = new Autocross(od4, missionID, frequency, steeringReq, velocityReq, VERBOSE);
+                        // apply the same logic as trackdrive, with lap = 1
+                        mission = new Trackdrive(od4, missionID, 30, gpsDistThres, 1, VERBOSE);
                         mission -> startMission("autocross");
                         break;
                     case asMission::AMI_MANUAL:
-                        //todo
-                        std::cerr <<  "[Error] \t Mission ID " << missionID <<" has not implemented yet." << std::endl;
+                        // this mission is for testing purpose for now
+                        mission = new Manual(od4, missionID, frequency, steeringReq, btSpeedReq, VERBOSE);
+                        mission -> startMission("manual");
                         break;
                     default:
                         std::cerr <<  "[Error] \t Mission ID " << missionID <<" is wrong or has not implemented yet." << std::endl;
