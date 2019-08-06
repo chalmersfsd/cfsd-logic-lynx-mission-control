@@ -86,7 +86,7 @@ bool Acceleration::step(){
     std::array<double, 2> distance = wgs84::toCartesian(m_startPos, m_currentPos);
     double d = distance[0]*distance[0] + distance[1]*distance[1];
     if (d > 6400 && numOrangeCones > 1 && m_speedReq) {
-        m_speedReq = 0;
+        m_speedReq = -1;
         m_endTimestamp = cluon::time::toMicroseconds(cluon::time::now());
     }
 
