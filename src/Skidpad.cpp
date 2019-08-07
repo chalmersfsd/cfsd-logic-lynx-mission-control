@@ -104,14 +104,15 @@ bool Skidpad::step(){
     
     m_collector.GetCompleteFrameCFSD19();
 
-    int numOrangeCones = m_collector.ProcessFrameCFSD19();
+    // number of [yellow, blue, orange, big orange] cones
+    std::array<int, 4> numCones = m_collector.ProcessFrameCFSD19();
 
     std::lock_guard<std::mutex> lock(m_gpsMutex);
     std::array<double, 2> distance = wgs84::toCartesian(m_startPos, m_currentPos);
     double d = distance[0]*distance[0] + distance[1]*distance[1];
     if (m_reachIntersection) {
         if (d < m_gpsDistThres2) {
-            if (m_isAwayFromStart && numOrangeCones > 1) {
+            if (m_isAwayFromStart && numCones[3] > 1) { // at least see 2 big orange cones
                 m_laps++;
                 m_isAwayFromStart = false;
             }
@@ -131,11 +132,11 @@ bool Skidpad::step(){
                 break;
             case 4:
                 m_flag = pathplannerFlag::PARKING;
-                if (d > 64 && d < 100 && numOrangeCones > 2)
+                if (d > 64 && d < 100 && numCones[2] > 2) // at least see 3 orange cones
                     m_missionFinished = true;
         }
     }
-    else if (d > 14.5*14.5 && d < 15.5*15.5 && numOrangeCones > 1) {
+    else if (d > 14.5*14.5 && d < 15.5*15.5 && numCones[3] > 1) { // at least see 2 big orange cones
         m_startPos = m_currentPos;
         m_reachIntersection = true;
     }

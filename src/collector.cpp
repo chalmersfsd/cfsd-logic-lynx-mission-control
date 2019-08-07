@@ -153,10 +153,11 @@ void Collector::getEquilibrioception(cluon::data::Envelope envelope) {
     }
 }
 
-int Collector::ProcessFrameCFSD19() {
+std::array<int, 4> Collector::ProcessFrameCFSD19() {
+    std::array<int, 4> numCones = {0,0,0,0};
     if (!m_currentConeFrame.size()) {
         std::cout << "Current frame has no cones!" << std::endl;
-        return 0;
+        return numCones;
     }
 
     if (m_verbose)
@@ -166,24 +167,24 @@ int Collector::ProcessFrameCFSD19() {
     // std::vector<Cone> tempYellowCones;
     // std::vector<Cone> tempBlueCones;
     // std::vector<Cone> tempOrangeCones;     
-    
-    int numBlueCones = 0;
-    int numYellowCones = 0;
-    int numOrangeCones = 0;
+
     while(m_currentConeFrame.size() >0) {
         Cone cone = m_currentConeFrame.front();
         switch (m_currentConeFrame.front().m_color) {
             case 0: // yellow
-                numYellowCones++;
+                numCones[0]++;
                 // tempYellowCones.push_back(cone);
                 break;
             case 1: // blue
-                numBlueCones++;
+                numCones[1]++;
                 // tempBlueCones.push_back(cone);
                 break;
             case 2: // orange
-                numOrangeCones++;
+                numCones[2]++;
                 // tempOrangeCones.push_back(cone);
+                break;
+            case 3: // big orange
+                numCones[3]++;
                 break;
         }
         // Done copying, delete pointers to free memory
@@ -191,11 +192,12 @@ int Collector::ProcessFrameCFSD19() {
     }
     if (m_verbose) {
         std::cout << "number of cones:" 
-                  << "\n    yellow " << numYellowCones
-                  << "\n      blue " << numBlueCones
-                  << "\n    orange " << numOrangeCones
+                  << "\n    yellow " << numCones[0]
+                  << "\n      blue " << numCones[1]
+                  << "\n    orange " << numCones[2]
+                  << "\nbig orange " << numCones[3]
                   << std::endl;
     }
 
-    return numOrangeCones;
+    return numCones;
 }

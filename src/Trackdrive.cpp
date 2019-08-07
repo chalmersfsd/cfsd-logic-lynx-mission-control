@@ -98,13 +98,15 @@ bool Trackdrive::step(){
     // m_od4.send(torque, ts, 2101);
 
     m_collector.GetCompleteFrameCFSD19();
-    int numOrangeCones = m_collector.ProcessFrameCFSD19();
+    
+    // number of [yellow, blue, orange, big orange] cones
+    std::array<int, 4> numCones = m_collector.ProcessFrameCFSD19();
 
     std::lock_guard<std::mutex> lock(m_gpsMutex);
     std::array<double, 2> distance = wgs84::toCartesian(m_startPos, m_currentPos);
     double d = distance[0]*distance[0] + distance[1]*distance[1];
     if (d < m_gpsDistThres2) {
-        if (m_isAwayFromStart && numOrangeCones > 1) {
+        if (m_isAwayFromStart && numCones[3] > 1) { // at least see 2 big orange cones
             m_laps++;
             m_isAwayFromStart = false;
         }

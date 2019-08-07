@@ -80,12 +80,14 @@ bool Acceleration::step(){
         return true;
 
     m_collector.GetCompleteFrameCFSD19();
-    int numOrangeCones = m_collector.ProcessFrameCFSD19();
+    
+    // number of [yellow, blue, orange, big orange] cones
+    std::array<int, 4> numCones = m_collector.ProcessFrameCFSD19();
 
     std::lock_guard<std::mutex> lock(m_gpsMutex);
     std::array<double, 2> distance = wgs84::toCartesian(m_startPos, m_currentPos);
     double d = distance[0]*distance[0] + distance[1]*distance[1];
-    if (d > 6400 && numOrangeCones > 1 && m_speedReq) {
+    if (d > 6400 && numCones[2] > 1 && m_speedReq) {
         m_speedReq = -1;
         m_endTimestamp = cluon::time::toMicroseconds(cluon::time::now());
     }

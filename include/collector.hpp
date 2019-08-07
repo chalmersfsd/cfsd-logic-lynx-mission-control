@@ -59,7 +59,7 @@ class Collector{
     // CFSD19 modification
     void CollectConesCFSD19();
     void GetCompleteFrameCFSD19();
-    int ProcessFrameCFSD19();
+    std::array<int, 4> ProcessFrameCFSD19();
     
   public:
     std::queue<Cone> m_currentConeFrame;
