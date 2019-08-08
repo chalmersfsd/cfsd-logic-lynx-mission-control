@@ -2,6 +2,7 @@
 
 Acceleration::Acceleration(cluon::OD4Session& od4, int missionID, int freq, float speedReq, bool VERBOSE)
   : MissionControl(od4, missionID, freq, VERBOSE)
+  , m_flag{pathplannerFlag::PARKING}
   , m_speedReq{speedReq}
   , m_gpsMutex{}
   , m_atStart{true}
@@ -97,8 +98,12 @@ bool Acceleration::step(){
     speed.groundSpeed(m_speedReq);
     m_od4.send(speed, ts, 2201);
 
+    opendlv::proxy::SwitchStateRequest flagMsg;
+    flagMsg.state(m_flag);
+    m_od4.send(flagMsg, cluon::time::now(), 2901);
+
     double dt = (double) (cluon::time::toMicroseconds(ts) - m_endTimestamp) / 1e6;
-    if (dt > 3) {
+    if (m_endTimestamp != 0 && dt > 3) {
         // assume the car should stop within t seconds and then mission finished, here t=3
         m_missionFinished = true;
     }

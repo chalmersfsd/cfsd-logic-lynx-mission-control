@@ -25,6 +25,7 @@ class Acceleration: public MissionControl
 {
 private:
     /* data */
+    pathplannerFlag m_flag;
     float m_speedReq;
     std::mutex m_gpsMutex;
     bool m_atStart;

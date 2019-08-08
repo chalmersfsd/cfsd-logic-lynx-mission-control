@@ -53,14 +53,13 @@ enum asMission {
 
 int32_t main(int32_t argc, char **argv) {
     auto commandlineArguments = cluon::getCommandlineArguments(argc, argv);
-    if (0 == commandlineArguments.count("cid") ||
-        0 == commandlineArguments.count("mapfile")) {
+    if (0 == commandlineArguments.count("cid")) {
         std::cerr << argv[0] << "Mission control." << std::endl;
         std::cerr << "Usage:   " << argv[0] << " --cid=<OD4 session> mission=<Mission No> [--verbose]" << std::endl;
         std::cerr << "         --cid:    CID of the OD4Session to send and receive messages" << std::endl;
         std::cerr << "         --mission:index of the Mission" << std::endl;
-        std::cerr << "Example: " << argv[0] << " --cid=131 --mission=0 --frequency=66"
-                  << " --inspectionTorqueReq=120 --braketestVelocityReq=12 --steeringReq=20"
+        std::cerr << "Example: " << argv[0] << " --cid=131 --mission=0 --frequency=60"
+                  << " --inspectionTorqueReq=30 --braketestVelocityReq=12 --steeringReq=20"
                   << " --accelerationVelocityReq=100 --gpsDistThres=1 --verbose" << std::endl;
     }
     else {
@@ -110,7 +109,7 @@ int32_t main(int32_t argc, char **argv) {
         od4.dataTrigger(opendlv::proxy::SwitchStateReading::ID(), SwitchStateReading);
 
         // if not given, use default values
-        uint16_t torqueReq = 30; // set a small constant torque request during inspection, to avoid accidentally setting too large torque which might cause damage
+        uint16_t inspTorqueReq = commandlineArguments.count("inspectionTorqueReq") ? static_cast<uint16_t>(std::stoi(commandlineArguments["braketestVelocityReq"])) : 30;
         float btSpeedReq = commandlineArguments.count("braketestVelocityReq") ? static_cast<float>(std::stoi(commandlineArguments["braketestVelocityReq"])) : 12;
         float steeringReq = commandlineArguments.count("steeringReq") ? static_cast<float>(std::stoi(commandlineArguments["steeringReq"])) : 20;
         float accSpeedReq = commandlineArguments.count("accelerationVelocityReq") ? static_cast<float>(std::stoi(commandlineArguments["braketestVelocityReq"])) : 100;
@@ -128,7 +127,7 @@ int32_t main(int32_t argc, char **argv) {
                         mission -> startMission("braketest");
                         break;
                     case asMission::AMI_INSPECTION:
-                        mission = new Inspection(od4, missionID, frequency, torqueReq, VERBOSE);
+                        mission = new Inspection(od4, missionID, frequency, inspTorqueReq, VERBOSE);
                         mission -> startMission("inspection");
                         break;
                     case asMission::AMI_ACCELERATION:

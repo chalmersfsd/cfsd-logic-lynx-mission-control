@@ -5,4 +5,4 @@ services:
         #image: chalmersfsd/cfsd-logic-lynx-mission-control:test-inspection5
         image: mission:latest
         network_mode: "host"
-        command: "--cid=130 --frequency=60 --braketestVelocityReq=12 --steeringReq=20 --gpsDistThres=1 --verbose"
+        command: "--cid=130 --frequency=60 --inspectionTorqueReq=30 --braketestVelocityReq=12 --steeringReq=20 --accelerationVelocityReq=100 --gpsDistThres=1 --verbose"
