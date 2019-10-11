@@ -44,14 +44,14 @@ bool Manual::step(){
     //speed.groundSpeed(m_speedReq);
     //m_od4.send(speed, ts, 2201);
 
-    double dt = (double) (cluon::time::toMicroseconds(ts) - m_startTimestamp) / 1e6;
-    int tq = (int) (20 * dt);
-    if (tq > 100)
-        tq = 100;
-    opendlv::cfsdProxy::TorqueRequestDual torque;
-    torque.torqueLeft(tq);
-    torque.torqueRight(tq);
-    m_od4.send(torque, ts, 2101);
+  //  double dt = (double) (cluon::time::toMicroseconds(ts) - m_startTimestamp) / 1e6;
+  //  int tq = (int) (20 * dt);
+ //   if (tq > 100)
+ //       tq = 100;
+  //  opendlv::cfsdProxy::TorqueRequestDual torque;
+   // torque.torqueLeft(tq);
+    //torque.torqueRight(tq);
+    //m_od4.send(torque, ts, 2101);
 
     // opendlv::proxy::GroundSteeringRequest steer;
     // steer.groundSteering(m_steeringReq);
